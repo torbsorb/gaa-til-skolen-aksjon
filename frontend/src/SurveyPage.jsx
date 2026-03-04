@@ -17,10 +17,10 @@ function SurveyPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus('Submitting...');
+    setStatus('Sender inn...');
     const selectedClass = classes.find(c => c.id === parseInt(form.class_id));
     if (!selectedClass) {
-      setStatus('Please select a class.');
+      setStatus('Velg en klasse.');
       return;
     }
     try {
@@ -36,12 +36,12 @@ function SurveyPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setStatus('Survey submitted!');
+        setStatus('Skjema sendt inn!');
       } else {
-        setStatus(data.detail || 'Error submitting survey');
+        setStatus('Feil ved innsending av skjema');
       }
     } catch (err) {
-      setStatus('Network error');
+      setStatus('Nettverksfeil');
     }
   };
 
@@ -63,12 +63,12 @@ function SurveyPage() {
 
   return (
     <div style={{ maxWidth: 400, margin: '2rem auto', padding: '2rem', border: '1px solid #ccc', borderRadius: 8 }}>
-      <h2>Teacher Survey Form</h2>
+      <h2>Daglig registrering</h2>
       <form onSubmit={handleSubmit}>
         <label>
-          Class:
+          Klasse:
           <select name="class_id" value={form.class_id} onChange={handleChange} required>
-            <option value="">Select class</option>
+            <option value="">Velg klasse</option>
             {classes.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
@@ -76,21 +76,21 @@ function SurveyPage() {
         </label>
         {form.class_id && classMap[form.class_id] && (
           <div style={{ margin: '0.5rem 0', color: '#1976d2', fontWeight: 'bold', fontSize: '1.1rem' }}>
-            Total students in class: {classMap[form.class_id].total_students}
+            Antall elever i klassen: {classMap[form.class_id].total_students}
           </div>
         )}
         <br />
         <label>
-          Date:
+          Dato:
           <input type="date" name="date" value={form.date} readOnly />
         </label>
         <br />
         <label>
-          Number of students who walked:
+            Antall elever som gikk til skolen:
           <input type="number" name="walked_count" value={form.walked_count} onChange={handleChange} required min="0" max={classMap[form.class_id]?.total_students || undefined} />
         </label>
         <br />
-        <button type="submit">Submit</button>
+        <button type="submit">Send inn</button>
       </form>
       <div style={{ marginTop: '1rem', color: 'green' }}>{status}</div>
     </div>
