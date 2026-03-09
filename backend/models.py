@@ -29,3 +29,11 @@ class SurveyResult(Base):
     walked_count = Column(Integer, nullable=False)
     total_students = Column(Integer, nullable=False)
     school_class = relationship("SchoolClass", back_populates="results")
+
+
+class CellEditAudit(Base):
+    __tablename__ = "cell_edit_audit"
+    id = Column(Integer, primary_key=True)
+    class_id = Column(Integer, ForeignKey("school_classes.id"), nullable=False)
+    date = Column(Date, nullable=False)
+    edit_count = Column(Integer, nullable=False, default=0)

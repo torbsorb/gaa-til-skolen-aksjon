@@ -5,9 +5,12 @@ import API_BASE from './apiBase';
 function EditableTablePage() {
   const [classes, setClasses] = useState([]);
   const [tableData, setTableData] = useState({}); // { class_id: { day: walked_count } }
+  const [editCounts, setEditCounts] = useState({}); // { class_id: { day: edit_count } }
   const [status, setStatus] = useState('');
   const [baseDate, setBaseDate] = useState(null);
+  const [cleanStatus, setCleanStatus] = useState('');
   const days = Array.from({ length: 10 }, (_, i) => i + 1);
+  const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
   useEffect(() => {
     // Fetch classes
@@ -27,10 +30,12 @@ function EditableTablePage() {
       })
       .then(data => {
         setTableData(data && typeof data.table === 'object' ? data.table : {});
+        setEditCounts(data && typeof data.edit_counts === 'object' ? data.edit_counts : {});
         if (data.base_date) setBaseDate(data.base_date);
       })
       .catch(() => {
         setTableData({});
+        setEditCounts({});
         setBaseDate(null);
       });
   }, []);
@@ -65,8 +70,38 @@ function EditableTablePage() {
         if (!res.ok) throw new Error('Lagring feilet');
         return res.json();
       })
-      .then(() => setStatus('Lagret!'))
+      .then((data) => {
+        setStatus('Lagret!');
+        if (typeof data.edit_count === 'number') {
+          setEditCounts(prev => ({
+            ...prev,
+            [classId]: {
+              ...(prev[classId] || {}),
+              [day]: data.edit_count
+            }
+          }));
+        }
+      })
       .catch(() => setStatus('Lagring feilet'));
+  };
+
+  const getCellBackground = (classId, day) => {
+    const count = Number(editCounts[classId]?.[day] || 0);
+    if (count > 5) return '#ffb3b3';
+    if (count > 3) return '#fff2a8';
+    return 'white';
+  };
+
+  const handleMarkClean = async () => {
+    setCleanStatus('Markerer som ren...');
+    try {
+      const res = await fetch(`${API_BASE}/admin/mark-clean`, { method: 'POST' });
+      if (!res.ok) throw new Error('Kun localhost');
+      setEditCounts({});
+      setCleanStatus('Databasen er markert som ren.');
+    } catch {
+      setCleanStatus('Kun tilgjengelig fra localhost på vertsmaskin.');
+    }
   };
 
   // Helper to get date string for each column
@@ -86,16 +121,22 @@ function EditableTablePage() {
   };
 
   return (
-    <div style={{ maxWidth: 900, margin: '2rem auto', padding: '2rem', border: '1px solid #ccc', borderRadius: 8 }}>
+    <div style={{ maxWidth: 900, margin: '2rem auto', padding: '2rem', border: '1px solid #ccc', borderRadius: 8, color: '#111', background: '#f9f9ff' }}>
       <h2>Redigerbare dagsresultater</h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      {isLocalHost && (
+        <div style={{ marginBottom: 10 }}>
+          <button onClick={handleMarkClean}>Marker database clean (localhost)</button>
+          {cleanStatus && <div style={{ marginTop: 6, color: '#222' }}>{cleanStatus}</div>}
+        </div>
+      )}
+      <table style={{ width: '100%', borderCollapse: 'collapse', color: '#111' }}>
         <thead>
           <tr>
-            <th>Klasse</th>
+            <th style={{ color: '#111' }}>Klasse</th>
             {days.map(day => (
               <th key={day}>
-                <div>{getWeekdayForDay(day)}</div>
-                <div style={{ fontSize: 12, fontWeight: 400 }}>{getDateForDay(day)}</div>
+                <div style={{ color: '#111' }}>{getWeekdayForDay(day)}</div>
+                <div style={{ fontSize: 12, fontWeight: 400, color: '#111' }}>{getDateForDay(day)}</div>
               </th>
             ))}
           </tr>
@@ -103,7 +144,7 @@ function EditableTablePage() {
         <tbody>
           {classes.map(cls => (
             <tr key={cls.id}>
-              <td style={{ whiteSpace: 'nowrap' }}>{cls.name} ({cls.total_students})</td>
+              <td style={{ whiteSpace: 'nowrap', color: '#111' }}>{cls.name} ({cls.total_students})</td>
               {days.map(day => (
                 <td key={day}>
                   <input
@@ -111,7 +152,7 @@ function EditableTablePage() {
                     inputMode="numeric"
                     value={tableData[cls.id]?.[day] || ''}
                     onChange={e => handleChange(cls.id, day, e.target.value, cls.total_students)}
-                    style={{ width: 60 }}
+                    style={{ width: 60, background: getCellBackground(cls.id, day), color: '#111', border: '1px solid #bbb' }}
                   />
                 </td>
               ))}
@@ -119,7 +160,7 @@ function EditableTablePage() {
           ))}
         </tbody>
       </table>
-      <div style={{ marginTop: '1rem', color: 'green' }}>{status}</div>
+      <div style={{ marginTop: '1rem', color: status.includes('feilet') ? '#b00020' : '#1b5e20' }}>{status}</div>
     </div>
   );
 }

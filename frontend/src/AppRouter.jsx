@@ -5,14 +5,21 @@ import ResultsPage from './ResultsPage';
 import EditableTablePage from './EditableTablePage';
 import LandingPage from './LandingPage';
 
+const TEACHER_PORTAL_PATH = '/secretTeacherPortal273892';
+
 function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/survey" element={<SurveyPage />} />
+        <Route path="/" element={<ResultsPage />} />
         <Route path="/results" element={<ResultsPage />} />
-        <Route path="/edit-table" element={<EditableTablePage />} />
+
+        <Route path={TEACHER_PORTAL_PATH} element={<LandingPage />} />
+        <Route path={`${TEACHER_PORTAL_PATH}/survey`} element={<SurveyPage />} />
+        <Route path={`${TEACHER_PORTAL_PATH}/edit-table`} element={<EditableTablePage />} />
+
+        <Route path="/survey" element={<Navigate to="/" replace />} />
+        <Route path="/edit-table" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

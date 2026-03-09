@@ -194,7 +194,7 @@ function ResultsPage() {
   };
 
   return (
-    <div style={{ maxWidth: 1400, width: '96vw', margin: '2rem auto', padding: '1.5rem', border: '1px solid #ccc', borderRadius: 8, boxSizing: 'border-box' }}>
+    <div style={{ maxWidth: 1400, width: '96vw', margin: '2rem auto', padding: '1.5rem', border: '1px solid #3b3b3b', borderRadius: 8, boxSizing: 'border-box', color: '#f3f3f3', background: '#242424' }}>
       <h2>Resultater</h2>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 12 }}>
         <label style={{ fontWeight: 600 }}>
@@ -202,7 +202,7 @@ function ResultsPage() {
           <span style={{ marginLeft: 8, color: '#1976d2' }}>Dag {simulatedDay}</span>
         </label>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 280 }}>
-          <span style={{ fontSize: 12, color: '#666' }}>1</span>
+          <span style={{ fontSize: 12, color: '#cfcfcf' }}>1</span>
           <input
             type="range"
             min="1"
@@ -212,9 +212,9 @@ function ResultsPage() {
             onChange={(e) => setSimulatedDay(Number(e.target.value))}
             style={{ flex: 1 }}
           />
-          <span style={{ fontSize: 12, color: '#666' }}>10</span>
+          <span style={{ fontSize: 12, color: '#cfcfcf' }}>10</span>
         </div>
-        <div style={{ color: '#444' }}>
+        <div style={{ color: '#d5d5d5' }}>
           Pågått: <strong>{simulatedDay}</strong> dager • Gjenstår: <strong>{10 - simulatedDay}</strong> dager
         </div>
       </div>
@@ -229,7 +229,7 @@ function ResultsPage() {
           return (
             <div>
               <div style={{ display: 'flex', gap: 16, alignItems: 'stretch', justifyContent: 'center', flexDirection: isWideLayout ? 'row' : 'column', marginBottom: 16 }}>
-                <div style={{ flex: '1 1 0', minWidth: 0, background: '#f9f9ff', borderRadius: 8, padding: 12, height: isWideLayout ? 320 : '52vh', maxHeight: 560 }}>
+                <div style={{ flex: '1 1 0', minWidth: 0, background: '#f9f9ff', borderRadius: 8, padding: 12, height: isWideLayout ? 320 : '52vh', maxHeight: 560, color: '#111' }}>
                   {datasets.length > 0 ? (
                     <Line data={chartData} options={chartOptions} />
                   ) : (
@@ -263,18 +263,18 @@ function ResultsPage() {
                     })}
                   </div>
 
-                  <table style={{ width: '100%', borderCollapse: 'collapse', background: '#f7faff', borderRadius: 8, overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', background: '#f7faff', borderRadius: 8, overflow: 'hidden', color: '#111' }}>
                     <thead>
                       <tr>
-                        <th>Klasse</th>
-                        <th>% som gikk</th>
+                        <th style={{ color: '#111' }}>Klasse</th>
+                        <th style={{ color: '#111' }}>% som gikk</th>
                       </tr>
                     </thead>
                     <tbody>
                       {groupEntries.map((entry, i) => (
-                        <tr key={entry.class_id} style={i < 3 ? { fontWeight: 'bold', color: '#111' } : {}}>
-                          <td>{entry.class_name}</td>
-                          <td>{entry.percent_walked.toFixed(1)}%</td>
+                        <tr key={entry.class_id} style={i < 3 ? { fontWeight: 'bold', color: '#111' } : { color: '#111' }}>
+                          <td style={{ color: '#111' }}>{entry.class_name}</td>
+                          <td style={{ color: '#111' }}>{entry.percent_walked.toFixed(1)}%</td>
                         </tr>
                       ))}
                     </tbody>

@@ -1,10 +1,10 @@
-from fastapi import FastAPI, Depends, HTTPException, Body
+from fastapi import FastAPI, Depends, HTTPException, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
 from class_api import router as class_router
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from database import SessionLocal
-from models import SurveyResult, SchoolClass, ClassGroup
+from models import SurveyResult, SchoolClass, ClassGroup, CellEditAudit
 from schemas import SurveyResultCreate, LeaderboardEntry
 from datetime import date, timedelta
 
@@ -111,17 +111,27 @@ def get_results_table(db: Session = Depends(get_db)):
         base_date = min(r.date for r in results)
     else:
         base_date = date.today()
-    # Build a dict: {class_id: {day: walked_count}}
+    # Build dicts: {class_id: {day: value}}
     table = {}
+    edit_counts = {}
     for c in classes:
         table[c.id] = {}
+        edit_counts[c.id] = {}
         for day in range(1, 11):
             table[c.id][str(day)] = ""
+            edit_counts[c.id][str(day)] = 0
     for r in results:
         day_num = (r.date - base_date).days + 1
         if 1 <= day_num <= 10:
             table[r.class_id][str(day_num)] = r.walked_count
-    return {"table": table, "base_date": str(base_date)}
+
+    audits = db.query(CellEditAudit).all()
+    for a in audits:
+        day_num = (a.date - base_date).days + 1
+        if 1 <= day_num <= 10 and a.class_id in edit_counts:
+            edit_counts[a.class_id][str(day_num)] = a.edit_count
+
+    return {"table": table, "edit_counts": edit_counts, "base_date": str(base_date)}
 
 
 # Upsert a single cell (class/day)
@@ -156,5 +166,28 @@ def upsert_survey(
             total_students=school_class.total_students,
         )
         db.add(result)
+
+    audit = (
+        db.query(CellEditAudit)
+        .filter(CellEditAudit.class_id == class_id, CellEditAudit.date == target_date)
+        .first()
+    )
+    if audit:
+        audit.edit_count += 1
+    else:
+        audit = CellEditAudit(class_id=class_id, date=target_date, edit_count=1)
+        db.add(audit)
+
+    db.commit()
+    return {"success": True, "edit_count": audit.edit_count}
+
+
+@app.post("/admin/mark-clean")
+def mark_clean(request: Request, db: Session = Depends(get_db)):
+    client_host = request.client.host if request.client else ""
+    if client_host not in {"127.0.0.1", "::1", "localhost"}:
+        raise HTTPException(status_code=403, detail="Only localhost can mark database clean")
+
+    db.query(CellEditAudit).delete()
     db.commit()
     return {"success": True}
