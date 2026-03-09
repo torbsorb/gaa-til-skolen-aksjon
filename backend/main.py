@@ -67,6 +67,8 @@ def submit_survey(result: SurveyResultCreate, db: Session = Depends(get_db)):
 @app.get("/standings", response_model=list[LeaderboardEntry])
 def get_standings(db: Session = Depends(get_db)):
     groups = db.query(ClassGroup).all()
+    # Number of competition days with at least one submitted result.
+    days_elapsed = db.query(func.count(func.distinct(SurveyResult.date))).scalar() or 0
     leaderboard = []
     for group in groups:
         class_entries = []
@@ -79,9 +81,8 @@ def get_standings(db: Session = Depends(get_db)):
             walked_total = sum(r.walked_count for r in results)
             # Always use the class's total_students value
             total_students = school_class.total_students
-            percent_walked = (
-                (walked_total / total_students * 100) if total_students else 0
-            )
+            denominator = total_students * days_elapsed
+            percent_walked = (walked_total / denominator * 100) if denominator else 0
             class_entries.append(
                 {
                     "group_id": group.id,

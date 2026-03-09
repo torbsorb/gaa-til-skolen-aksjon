@@ -25,6 +25,7 @@ function ResultsPage() {
   const [classes, setClasses] = useState([]);
   const [isWideLayout, setIsWideLayout] = useState(true);
   const [apiError, setApiError] = useState('');
+  const [simulatedDay, setSimulatedDay] = useState(5);
   const days = Array.from({ length: 10 }, (_, i) => i + 1);
 
   const fetchLeaders = async () => {
@@ -108,22 +109,55 @@ function ResultsPage() {
   };
 
   // Group navigation logic (same as leaderboard)
-  const groupNames = Object.keys(groupedLeaders);
-  const currentGroup = groupNames.length > 0 ? groupNames[groupPage % groupNames.length] : null;
-  // Filter classes in the current group
-  const groupClassIds = currentGroup
-    ? (groupedLeaders[currentGroup] || []).map(entry => entry.class_id)
-    : [];
   const safeClasses = Array.isArray(classes) ? classes : [];
+  const classById = Object.fromEntries(safeClasses.map((c) => [c.id, c]));
+
+  // Recompute standings using the same simulated-day math as the graph.
+  const simulatedEntries = leaders.map((entry) => {
+    const classInfo = classById[entry.class_id] || {};
+    const totalStudents = Number(classInfo.total_students || entry.total_students || 0);
+    let walkedTotal = 0;
+    for (let day = 1; day <= simulatedDay; day += 1) {
+      walkedTotal += Number(tableData[entry.class_id]?.[day] || 0);
+    }
+    const denominator = totalStudents * simulatedDay;
+    const percentWalked = denominator ? (walkedTotal / denominator) * 100 : 0;
+    return {
+      ...entry,
+      walked_total: walkedTotal,
+      total_students: totalStudents,
+      percent_walked: percentWalked,
+    };
+  });
+
+  const simulatedGroupedLeaders = {};
+  simulatedEntries.forEach((entry) => {
+    if (!simulatedGroupedLeaders[entry.group_name]) {
+      simulatedGroupedLeaders[entry.group_name] = [];
+    }
+    simulatedGroupedLeaders[entry.group_name].push(entry);
+  });
+
+  const groupNames = Object.keys(simulatedGroupedLeaders);
+  const currentGroup = groupNames.length > 0 ? groupNames[groupPage % groupNames.length] : null;
+  const groupEntries = currentGroup
+    ? [...(simulatedGroupedLeaders[currentGroup] || [])].sort((a, b) => b.percent_walked - a.percent_walked)
+    : [];
+
+  // Filter classes in the current group
+  const groupClassIds = groupEntries.map((entry) => entry.class_id);
   const groupClasses = safeClasses.filter(cls => groupClassIds.includes(cls.id));
 
   // Build datasets for each class in the group
   const datasets = groupClasses.map(cls => {
+    const totalStudents = Number(cls.total_students || 0);
     let cumSum = 0;
     const data = days.map(day => {
+      if (day > simulatedDay) return null;
       const val = Number(tableData[cls.id]?.[day] || 0);
       cumSum += val;
-      return cumSum;
+      const denominator = totalStudents * day;
+      return denominator ? (cumSum / denominator) * 100 : 0;
     });
     return {
       label: cls.name,
@@ -145,10 +179,16 @@ function ResultsPage() {
     maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' },
-      title: { display: true, text: `Kumulativt antall som gikk - ${currentGroup || ''}` }
+      title: { display: true, text: `Kumulativ andel som gikk - ${currentGroup || ''} (Dag ${simulatedDay})` }
     },
     scales: {
-      y: { beginAtZero: true, title: { display: true, text: 'Kumulativt antall som gikk' } },
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Kumulativ andel (%)' },
+        ticks: {
+          callback: (value) => `${value}%`
+        }
+      },
       x: { title: { display: true, text: 'Dato' } }
     }
   };
@@ -156,6 +196,28 @@ function ResultsPage() {
   return (
     <div style={{ maxWidth: 1400, width: '96vw', margin: '2rem auto', padding: '1.5rem', border: '1px solid #ccc', borderRadius: 8, boxSizing: 'border-box' }}>
       <h2>Resultater</h2>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+        <label style={{ fontWeight: 600 }}>
+          Simuler konkurransedag:
+          <span style={{ marginLeft: 8, color: '#1976d2' }}>Dag {simulatedDay}</span>
+        </label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 280 }}>
+          <span style={{ fontSize: 12, color: '#666' }}>1</span>
+          <input
+            type="range"
+            min="1"
+            max="10"
+            step="1"
+            value={simulatedDay}
+            onChange={(e) => setSimulatedDay(Number(e.target.value))}
+            style={{ flex: 1 }}
+          />
+          <span style={{ fontSize: 12, color: '#666' }}>10</span>
+        </div>
+        <div style={{ color: '#444' }}>
+          Pågått: <strong>{simulatedDay}</strong> dager • Gjenstår: <strong>{10 - simulatedDay}</strong> dager
+        </div>
+      </div>
       {apiError && (
         <div style={{ marginBottom: 12, color: '#b00020', fontWeight: 600 }}>{apiError}</div>
       )}
@@ -163,10 +225,7 @@ function ResultsPage() {
         <div>Laster resultatliste...</div>
       ) : (
         (() => {
-          const groupNames = Object.keys(groupedLeaders);
           if (groupNames.length === 0) return <div>Fant ingen trinn.</div>;
-          const currentGroup = groupNames[groupPage % groupNames.length];
-          const groupEntries = groupedLeaders[currentGroup].sort((a, b) => b.percent_walked - a.percent_walked);
           return (
             <div>
               <div style={{ display: 'flex', gap: 16, alignItems: 'stretch', justifyContent: 'center', flexDirection: isWideLayout ? 'row' : 'column', marginBottom: 16 }}>
