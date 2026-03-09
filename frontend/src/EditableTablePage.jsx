@@ -9,6 +9,7 @@ function EditableTablePage() {
   const [status, setStatus] = useState('');
   const [baseDate, setBaseDate] = useState(null);
   const [cleanStatus, setCleanStatus] = useState('');
+  const [simulatedDay, setSimulatedDay] = useState(5);
   const days = Array.from({ length: 10 }, (_, i) => i + 1);
   const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
@@ -120,9 +121,40 @@ function EditableTablePage() {
     return weekday.charAt(0).toUpperCase() + weekday.slice(1);
   };
 
+  const currentCompetitionDay = simulatedDay;
+
+  const getColumnBackground = (day) => {
+    if (day === currentCompetitionDay) return '#dbeafe';
+    if (day < currentCompetitionDay) return '#e8edf3';
+    return '#e2e8f0';
+  };
+
   return (
     <div style={{ maxWidth: 900, margin: '2rem auto', padding: '2rem', border: '1px solid #ccc', borderRadius: 8, color: '#111', background: '#f9f9ff' }}>
       <h2>Redigerbare dagsresultater</h2>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+        <label style={{ fontWeight: 600 }}>
+          Simuler konkurransedag:
+          <span style={{ marginLeft: 8, color: '#1976d2' }}>Dag {simulatedDay}</span>
+        </label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 280 }}>
+          <span style={{ fontSize: 12, color: '#666' }}>1</span>
+          <input
+            type="range"
+            min="1"
+            max="10"
+            step="1"
+            value={simulatedDay}
+            onChange={(e) => setSimulatedDay(Number(e.target.value))}
+            style={{ flex: 1 }}
+          />
+          <span style={{ fontSize: 12, color: '#666' }}>10</span>
+        </div>
+      </div>
+      <div style={{ marginBottom: 10, color: '#333' }}>
+        Aktiv dag: <strong>Dag {currentCompetitionDay}</strong>.
+        Tidligere dager kan endres, fremtidige dager er låst.
+      </div>
       {isLocalHost && (
         <div style={{ marginBottom: 10 }}>
           <button onClick={handleMarkClean}>Marker database clean (localhost)</button>
@@ -134,7 +166,7 @@ function EditableTablePage() {
           <tr>
             <th style={{ color: '#111' }}>Klasse</th>
             {days.map(day => (
-              <th key={day}>
+              <th key={day} style={{ background: getColumnBackground(day) }}>
                 <div style={{ color: '#111' }}>{getWeekdayForDay(day)}</div>
                 <div style={{ fontSize: 12, fontWeight: 400, color: '#111' }}>{getDateForDay(day)}</div>
               </th>
@@ -146,13 +178,21 @@ function EditableTablePage() {
             <tr key={cls.id}>
               <td style={{ whiteSpace: 'nowrap', color: '#111' }}>{cls.name} ({cls.total_students})</td>
               {days.map(day => (
-                <td key={day}>
+                <td key={day} style={{ background: getColumnBackground(day) }}>
                   <input
                     type="text"
                     inputMode="numeric"
                     value={tableData[cls.id]?.[day] || ''}
+                    disabled={day > currentCompetitionDay}
                     onChange={e => handleChange(cls.id, day, e.target.value, cls.total_students)}
-                    style={{ width: 60, background: getCellBackground(cls.id, day), color: '#111', border: '1px solid #bbb' }}
+                    style={{
+                      width: 60,
+                      background: day > currentCompetitionDay ? '#cbd5e1' : getCellBackground(cls.id, day),
+                      color: '#111',
+                      border: '1px solid #bbb',
+                      opacity: day > currentCompetitionDay ? 0.75 : 1,
+                      cursor: day > currentCompetitionDay ? 'not-allowed' : 'text'
+                    }}
                   />
                 </td>
               ))}
