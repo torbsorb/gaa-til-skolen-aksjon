@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import API_BASE from './apiBase';
 
 
 function EditableTablePage() {
@@ -10,15 +11,27 @@ function EditableTablePage() {
 
   useEffect(() => {
     // Fetch classes
-    fetch('http://localhost:8000/classes')
-      .then(res => res.json())
-      .then(data => setClasses(data));
+    fetch(`${API_BASE}/classes`)
+      .then(res => {
+        if (!res.ok) throw new Error('Feil ved henting av klasser');
+        return res.json();
+      })
+      .then(data => setClasses(Array.isArray(data) ? data : []))
+      .catch(() => setClasses([]));
+
     // Fetch all survey results and base date
-    fetch('http://localhost:8000/results-table')
-      .then(res => res.json())
+    fetch(`${API_BASE}/results-table`)
+      .then(res => {
+        if (!res.ok) throw new Error('Feil ved henting av tabell');
+        return res.json();
+      })
       .then(data => {
-        setTableData(data.table || data); // fallback for old API
+        setTableData(data && typeof data.table === 'object' ? data.table : {});
         if (data.base_date) setBaseDate(data.base_date);
+      })
+      .catch(() => {
+        setTableData({});
+        setBaseDate(null);
       });
   }, []);
 
@@ -43,7 +56,7 @@ function EditableTablePage() {
       }
     }));
     // Auto-save to backend
-    fetch('http://localhost:8000/survey', {
+    fetch(`${API_BASE}/survey`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ class_id: classId, day, walked_count: normalizedValue === '' ? 0 : normalizedValue })

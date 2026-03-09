@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import API_BASE from './apiBase';
 
 function SurveyPage() {
   const todayStr = new Date().toISOString().split('T')[0];
@@ -24,7 +25,7 @@ function SurveyPage() {
       return;
     }
     try {
-      const res = await fetch('http://localhost:8000/survey', {
+      const res = await fetch(`${API_BASE}/survey`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -48,11 +49,13 @@ function SurveyPage() {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch('http://localhost:8000/classes');
+        const res = await fetch(`${API_BASE}/classes`);
+        if (!res.ok) throw new Error('Feil ved henting av klasser');
         const data = await res.json();
-        setClasses(data);
+        const safeData = Array.isArray(data) ? data : [];
+        setClasses(safeData);
         const cmap = {};
-        data.forEach(c => { cmap[c.id] = c; });
+        safeData.forEach(c => { cmap[c.id] = c; });
         setClassMap(cmap);
       } catch {
         setClasses([]);
