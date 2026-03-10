@@ -84,12 +84,48 @@ def ensure_reference_data(db: Session) -> bool:
     return changed
 
 
+def seed_preview_data(db: Session) -> bool:
+    """Populate 10 days of realistic fake survey data for preview/demo mode."""
+    if db.query(SurveyResult).count() > 0:
+        return False  # Already has data, don't overwrite.
+
+    import random
+    random.seed(42)  # Deterministic so every cold-start gets identical data.
+
+    classes = db.query(SchoolClass).all()
+    if not classes:
+        return False
+
+    base_date = date(2026, 3, 1)
+    for school_class in classes:
+        # Each class has its own "baseline" walk rate (60–95 %) with per-day noise.
+        baseline = random.uniform(0.60, 0.95)
+        for day in range(1, 11):
+            rate = max(0.0, min(1.0, baseline + random.uniform(-0.10, 0.10)))
+            walked = round(school_class.total_students * rate)
+            target_date = base_date + timedelta(days=day - 1)
+            db.add(
+                SurveyResult(
+                    class_id=school_class.id,
+                    date=target_date,
+                    walked_count=walked,
+                    total_students=school_class.total_students,
+                )
+            )
+
+    db.commit()
+    return True
+
+
 @app.on_event("startup")
 def bootstrap_reference_data():
     db = SessionLocal()
     try:
         if ensure_reference_data(db):
             print("Bootstrapped missing class/group reference data.")
+        if APP_MODE == "preview":
+            if seed_preview_data(db):
+                print("Seeded preview simulation data.")
     finally:
         db.close()
 
