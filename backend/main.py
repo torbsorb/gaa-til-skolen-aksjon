@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
 from class_api import router as class_router
+from class_map import class_map, competition_map
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from database import SessionLocal
@@ -28,6 +29,67 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+    finally:
+        db.close()
+
+
+def ensure_reference_data(db: Session) -> bool:
+    # Keep existing data intact; only add missing groups/classes.
+    changed = False
+
+    groups_by_name = {g.name: g for g in db.query(ClassGroup).all()}
+    for group in competition_map:
+        for group_name in group.keys():
+            if group_name not in groups_by_name:
+                new_group = ClassGroup(name=group_name)
+                db.add(new_group)
+                db.flush()
+                groups_by_name[group_name] = new_group
+                changed = True
+
+    class_to_group = {}
+    for group in competition_map:
+        for group_name, class_names in group.items():
+            for class_name in class_names:
+                class_to_group[class_name] = group_name
+
+    class_totals = {}
+    for class_set in class_map:
+        for class_dict in class_set:
+            for class_name, total_students in class_dict.items():
+                class_totals[class_name] = total_students
+
+    existing_class_names = {c.name for c in db.query(SchoolClass).all()}
+    for class_name, total_students in class_totals.items():
+        if class_name in existing_class_names:
+            continue
+        group_name = class_to_group.get(class_name)
+        if group_name is None:
+            continue
+        group_obj = groups_by_name.get(group_name)
+        if group_obj is None:
+            continue
+        db.add(
+            SchoolClass(
+                name=class_name,
+                group_id=group_obj.id,
+                total_students=total_students,
+            )
+        )
+        changed = True
+
+    if changed:
+        db.commit()
+
+    return changed
+
+
+@app.on_event("startup")
+def bootstrap_reference_data():
+    db = SessionLocal()
+    try:
+        if ensure_reference_data(db):
+            print("Bootstrapped missing class/group reference data.")
     finally:
         db.close()
 
