@@ -20,6 +20,7 @@ def get_classes(db: Session = Depends(get_db)):
             "id": c.id,
             "name": c.name,
             "group_id": c.group_id,
+            "group_name": c.group.name if c.group else None,
             "total_students": c.total_students
         }
         for c in classes

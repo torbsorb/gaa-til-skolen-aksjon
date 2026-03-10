@@ -7,6 +7,11 @@ from database import SessionLocal
 from models import SurveyResult, SchoolClass, ClassGroup, CellEditAudit
 from schemas import SurveyResultCreate, LeaderboardEntry
 from datetime import date, timedelta
+import os
+
+APP_MODE = os.getenv("APP_MODE", "preview").strip().lower()
+if APP_MODE not in {"preview", "campaign"}:
+    APP_MODE = "preview"
 
 app = FastAPI()
 app.include_router(class_router)
@@ -30,6 +35,27 @@ def get_db():
 @app.get("/")
 def read_root():
     return {"message": "Backend is running"}
+
+
+@app.get("/app-config")
+def app_config():
+    return {
+        "app_mode": APP_MODE,
+        "simulation_enabled": APP_MODE == "preview",
+    }
+
+
+@app.get("/admin/deployment-status")
+def deployment_status(db: Session = Depends(get_db)):
+    survey_rows = db.query(SurveyResult).count()
+    audit_rows = db.query(CellEditAudit).count()
+    return {
+        "app_mode": APP_MODE,
+        "simulation_enabled": APP_MODE == "preview",
+        "campaign_db_clean": survey_rows == 0 and audit_rows == 0,
+        "survey_results_rows": survey_rows,
+        "cell_edit_audit_rows": audit_rows,
+    }
 
 
 @app.post("/survey")

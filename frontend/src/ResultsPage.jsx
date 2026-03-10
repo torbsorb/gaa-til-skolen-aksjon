@@ -18,7 +18,6 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 function ResultsPage() {
   const [leaders, setLeaders] = useState([]);
   const [loadingLeaders, setLoadingLeaders] = useState(false);
-  const [groupedLeaders, setGroupedLeaders] = useState({});
   const [groupPage, setGroupPage] = useState(0);
   const [tableData, setTableData] = useState({});
   const [baseDate, setBaseDate] = useState(null);
@@ -26,28 +25,38 @@ function ResultsPage() {
   const [isWideLayout, setIsWideLayout] = useState(true);
   const [apiError, setApiError] = useState('');
   const [simulatedDay, setSimulatedDay] = useState(5);
+  const [simulationEnabled, setSimulationEnabled] = useState(true);
   const days = Array.from({ length: 10 }, (_, i) => i + 1);
+
+  const getLiveCompetitionDay = () => {
+    if (!baseDate) return 1;
+    const start = new Date(`${baseDate}T00:00:00`);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
+    return Math.max(1, Math.min(10, diffDays));
+  };
+
+  const effectiveDay = simulationEnabled ? simulatedDay : getLiveCompetitionDay();
 
   const fetchLeaders = async () => {
     setLoadingLeaders(true);
     setApiError('');
     try {
       const res = await fetch(`${API_BASE}/standings`);
-      if (!res.ok) throw new Error('Feil ved henting av resultater');
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`GET /standings feilet (${res.status}). ${body.slice(0, 180)}`);
+      }
       const data = await res.json();
-      if (!Array.isArray(data)) throw new Error('Ugyldig svar for resultater');
+      if (!Array.isArray(data)) {
+        throw new Error('GET /standings returnerte ugyldig format (forventet liste).');
+      }
       setLeaders(data);
-      // Group by group_name
-      const groups = {};
-      data.forEach(entry => {
-        if (!groups[entry.group_name]) groups[entry.group_name] = [];
-        groups[entry.group_name].push(entry);
-      });
-      setGroupedLeaders(groups);
-    } catch {
+    } catch (err) {
       setLeaders([]);
-      setGroupedLeaders({});
-      setApiError('Får ikke kontakt med backend. Sjekk at serveren kjører på nettverket.');
+      const message = err instanceof Error ? err.message : 'Ukjent feil.';
+      setApiError(`Klarte ikke hente resultater fra backend. ${message}`);
     }
     setLoadingLeaders(false);
   };
@@ -78,10 +87,22 @@ function ResultsPage() {
     }
   };
 
+  const fetchAppConfig = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/app-config`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setSimulationEnabled(Boolean(data.simulation_enabled));
+    } catch {
+      // Keep defaults for local development if config endpoint is unavailable.
+    }
+  };
+
   useEffect(() => {
     fetchLeaders();
     fetchTableData();
     fetchClasses();
+    fetchAppConfig();
 
     const getWideLayout = () => {
       const isLandscape = window.matchMedia('(orientation: landscape)').matches;
@@ -117,10 +138,10 @@ function ResultsPage() {
     const classInfo = classById[entry.class_id] || {};
     const totalStudents = Number(classInfo.total_students || entry.total_students || 0);
     let walkedTotal = 0;
-    for (let day = 1; day <= simulatedDay; day += 1) {
+    for (let day = 1; day <= effectiveDay; day += 1) {
       walkedTotal += Number(tableData[entry.class_id]?.[day] || 0);
     }
-    const denominator = totalStudents * simulatedDay;
+    const denominator = totalStudents * effectiveDay;
     const percentWalked = denominator ? (walkedTotal / denominator) * 100 : 0;
     return {
       ...entry,
@@ -153,7 +174,7 @@ function ResultsPage() {
     const totalStudents = Number(cls.total_students || 0);
     let cumSum = 0;
     const data = days.map(day => {
-      if (day > simulatedDay) return null;
+      if (day > effectiveDay) return null;
       const val = Number(tableData[cls.id]?.[day] || 0);
       cumSum += val;
       const denominator = totalStudents * day;
@@ -179,7 +200,7 @@ function ResultsPage() {
     maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' },
-      title: { display: true, text: `Kumulativ andel som gikk - ${currentGroup || ''} (Dag ${simulatedDay})` }
+      title: { display: true, text: `Kumulativ andel som gikk - ${currentGroup || ''} (Dag ${effectiveDay})` }
     },
     scales: {
       y: {
@@ -197,25 +218,31 @@ function ResultsPage() {
     <div style={{ maxWidth: 1400, width: '96vw', margin: '2rem auto', padding: '1.5rem', border: '1px solid #3b3b3b', borderRadius: 8, boxSizing: 'border-box', color: '#f3f3f3', background: '#242424' }}>
       <h2>Resultater</h2>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-        <label style={{ fontWeight: 600 }}>
-          Simuler konkurransedag:
-          <span style={{ marginLeft: 8, color: '#1976d2' }}>Dag {simulatedDay}</span>
-        </label>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 280 }}>
-          <span style={{ fontSize: 12, color: '#cfcfcf' }}>1</span>
-          <input
-            type="range"
-            min="1"
-            max="10"
-            step="1"
-            value={simulatedDay}
-            onChange={(e) => setSimulatedDay(Number(e.target.value))}
-            style={{ flex: 1 }}
-          />
-          <span style={{ fontSize: 12, color: '#cfcfcf' }}>10</span>
-        </div>
+        {simulationEnabled ? (
+          <>
+            <label style={{ fontWeight: 600 }}>
+              Simuler konkurransedag:
+              <span style={{ marginLeft: 8, color: '#1976d2' }}>Dag {simulatedDay}</span>
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 280 }}>
+              <span style={{ fontSize: 12, color: '#cfcfcf' }}>1</span>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                step="1"
+                value={simulatedDay}
+                onChange={(e) => setSimulatedDay(Number(e.target.value))}
+                style={{ flex: 1 }}
+              />
+              <span style={{ fontSize: 12, color: '#cfcfcf' }}>10</span>
+            </div>
+          </>
+        ) : (
+          <div style={{ fontWeight: 600 }}>Konkurransedag: <span style={{ color: '#1976d2' }}>Dag {effectiveDay}</span></div>
+        )}
         <div style={{ color: '#d5d5d5' }}>
-          Pågått: <strong>{simulatedDay}</strong> dager • Gjenstår: <strong>{10 - simulatedDay}</strong> dager
+          Pågått: <strong>{effectiveDay}</strong> dager • Gjenstår: <strong>{10 - effectiveDay}</strong> dager
         </div>
       </div>
       {apiError && (
@@ -288,7 +315,13 @@ function ResultsPage() {
                   <div style={{ fontWeight: 'bold', fontSize: 20, margin: '0 24px', color: '#1976d2' }}>{currentGroup}</div>
                   <button onClick={() => setGroupPage((p) => (p + 1) % groupNames.length)}>Neste &gt;</button>
                 </div>
-                <button onClick={fetchLeaders}>Oppdater resultater</button>
+                <button onClick={() => {
+                  fetchLeaders();
+                  fetchTableData();
+                  fetchClasses();
+                }}>
+                  Oppdater resultater
+                </button>
               </div>
             </div>
           );

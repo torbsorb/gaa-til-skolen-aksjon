@@ -10,8 +10,20 @@ function EditableTablePage() {
   const [baseDate, setBaseDate] = useState(null);
   const [cleanStatus, setCleanStatus] = useState('');
   const [simulatedDay, setSimulatedDay] = useState(5);
+  const [simulationEnabled, setSimulationEnabled] = useState(true);
   const days = Array.from({ length: 10 }, (_, i) => i + 1);
   const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+  const getLiveCompetitionDay = () => {
+    if (!baseDate) return 1;
+    const start = new Date(`${baseDate}T00:00:00`);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
+    return Math.max(1, Math.min(10, diffDays));
+  };
+
+  const currentCompetitionDay = simulationEnabled ? simulatedDay : getLiveCompetitionDay();
 
   useEffect(() => {
     // Fetch classes
@@ -38,6 +50,18 @@ function EditableTablePage() {
         setTableData({});
         setEditCounts({});
         setBaseDate(null);
+      });
+
+    fetch(`${API_BASE}/app-config`)
+      .then(res => {
+        if (!res.ok) throw new Error('Ingen app-config');
+        return res.json();
+      })
+      .then(data => {
+        setSimulationEnabled(Boolean(data.simulation_enabled));
+      })
+      .catch(() => {
+        // Keep preview defaults if endpoint is unavailable.
       });
   }, []);
 
@@ -121,8 +145,6 @@ function EditableTablePage() {
     return weekday.charAt(0).toUpperCase() + weekday.slice(1);
   };
 
-  const currentCompetitionDay = simulatedDay;
-
   const getColumnBackground = (day) => {
     if (day === currentCompetitionDay) return '#dbeafe';
     if (day < currentCompetitionDay) return '#e8edf3';
@@ -133,23 +155,31 @@ function EditableTablePage() {
     <div style={{ maxWidth: 900, margin: '2rem auto', padding: '2rem', border: '1px solid #ccc', borderRadius: 8, color: '#111', background: '#f9f9ff' }}>
       <h2>Redigerbare dagsresultater</h2>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-        <label style={{ fontWeight: 600 }}>
-          Simuler konkurransedag:
-          <span style={{ marginLeft: 8, color: '#1976d2' }}>Dag {simulatedDay}</span>
-        </label>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 280 }}>
-          <span style={{ fontSize: 12, color: '#666' }}>1</span>
-          <input
-            type="range"
-            min="1"
-            max="10"
-            step="1"
-            value={simulatedDay}
-            onChange={(e) => setSimulatedDay(Number(e.target.value))}
-            style={{ flex: 1 }}
-          />
-          <span style={{ fontSize: 12, color: '#666' }}>10</span>
-        </div>
+        {simulationEnabled ? (
+          <>
+            <label style={{ fontWeight: 600 }}>
+              Simuler konkurransedag:
+              <span style={{ marginLeft: 8, color: '#1976d2' }}>Dag {simulatedDay}</span>
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 280 }}>
+              <span style={{ fontSize: 12, color: '#666' }}>1</span>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                step="1"
+                value={simulatedDay}
+                onChange={(e) => setSimulatedDay(Number(e.target.value))}
+                style={{ flex: 1 }}
+              />
+              <span style={{ fontSize: 12, color: '#666' }}>10</span>
+            </div>
+          </>
+        ) : (
+          <div style={{ fontWeight: 600 }}>
+            Konkurransedag: <span style={{ marginLeft: 8, color: '#1976d2' }}>Dag {currentCompetitionDay}</span>
+          </div>
+        )}
       </div>
       <div style={{ marginBottom: 10, color: '#333' }}>
         Aktiv dag: <strong>Dag {currentCompetitionDay}</strong>.
