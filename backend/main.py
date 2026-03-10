@@ -84,9 +84,9 @@ def ensure_reference_data(db: Session) -> bool:
     return changed
 
 
-def seed_preview_data(db: Session) -> bool:
+def seed_preview_data(db: Session, force: bool = False) -> bool:
     """Populate 10 days of realistic fake survey data for preview/demo mode."""
-    if db.query(SurveyResult).count() > 0:
+    if not force and db.query(SurveyResult).count() > 0:
         return False  # Already has data, don't overwrite.
 
     import random
@@ -130,6 +130,18 @@ def bootstrap_reference_data():
         db.close()
 
 
+@app.post("/admin/reset-preview-data")
+def reset_preview_data(db: Session = Depends(get_db)):
+    """Delete all survey results and re-seed preview data. Only available in preview mode."""
+    if APP_MODE != "preview":
+        raise HTTPException(status_code=403, detail="Only available in preview mode")
+    db.query(CellEditAudit).delete()
+    db.query(SurveyResult).delete()
+    db.commit()
+    seed_preview_data(db, force=True)
+    return {"success": True, "message": "Simulerte data gjenopprettet"}
+
+
 @app.get("/")
 def read_root():
     return {"message": "Backend is running"}
@@ -141,6 +153,17 @@ def app_config():
         "app_mode": APP_MODE,
         "simulation_enabled": APP_MODE == "preview",
     }
+
+
+@app.post("/admin/reset-and-seed-preview")
+def reset_and_seed_preview(db: Session = Depends(get_db)):
+    if APP_MODE != "preview":
+        raise HTTPException(status_code=403, detail="Only available in preview mode")
+    db.query(CellEditAudit).delete()
+    db.query(SurveyResult).delete()
+    db.commit()
+    seeded = seed_preview_data(db)
+    return {"ok": True, "seeded": seeded}
 
 
 @app.get("/admin/deployment-status")

@@ -9,6 +9,7 @@ function EditableTablePage() {
   const [status, setStatus] = useState('');
   const [baseDate, setBaseDate] = useState(null);
   const [cleanStatus, setCleanStatus] = useState('');
+  const [reseedStatus, setReseedStatus] = useState('');
   const [simulatedDay, setSimulatedDay] = useState(5);
   const [simulationEnabled, setSimulationEnabled] = useState(true);
   const days = Array.from({ length: 10 }, (_, i) => i + 1);
@@ -117,6 +118,23 @@ function EditableTablePage() {
     return 'white';
   };
 
+  const handleReseedPreview = async () => {
+    setReseedStatus('Gjenoppretter...');
+    try {
+      const res = await fetch(`${API_BASE}/admin/reset-preview-data`, { method: 'POST' });
+      if (!res.ok) throw new Error('Feilet');
+      // Reload data
+      const tableRes = await fetch(`${API_BASE}/results-table`);
+      const tableJson = await tableRes.json();
+      setTableData(tableJson?.table || {});
+      setEditCounts(tableJson?.edit_counts || {});
+      if (tableJson?.base_date) setBaseDate(tableJson.base_date);
+      setReseedStatus('Simulerte data er gjenopprettet!');
+    } catch {
+      setReseedStatus('Feilet – er APP_MODE=preview?');
+    }
+  };
+
   const handleMarkClean = async () => {
     setCleanStatus('Markerer som ren...');
     try {
@@ -185,6 +203,17 @@ function EditableTablePage() {
         Aktiv dag: <strong>Dag {currentCompetitionDay}</strong>.
         Tidligere dager kan endres, fremtidige dager er låst.
       </div>
+      {simulationEnabled && (
+        <div style={{ marginBottom: 10 }}>
+          <button
+            onClick={handleReseedPreview}
+            style={{ background: '#1976d2', color: 'white', border: 'none', borderRadius: 4, padding: '6px 14px', cursor: 'pointer' }}
+          >
+            Gjenopprett simulerte data
+          </button>
+          {reseedStatus && <span style={{ marginLeft: 12, color: reseedStatus.includes('eilet') ? '#b00020' : '#1b5e20' }}>{reseedStatus}</span>}
+        </div>
+      )}
       {isLocalHost && (
         <div style={{ marginBottom: 10 }}>
           <button onClick={handleMarkClean}>Marker database clean (localhost)</button>
