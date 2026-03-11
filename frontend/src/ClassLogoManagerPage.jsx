@@ -187,7 +187,7 @@ function ClassLogoManagerPage() {
                     cursor: isUploading ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  Tilbakestill til standard
+                  Tilbakestill til dyr
                 </button>
               </div>
             );
