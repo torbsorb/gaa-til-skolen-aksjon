@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import API_BASE from './apiBase';
+import ClassLogo from './ClassLogo';
 
 function SurveyPage() {
   const todayStr = new Date().toISOString().split('T')[0];
@@ -78,8 +79,12 @@ function SurveyPage() {
           </select>
         </label>
         {form.class_id && classMap[form.class_id] && (
-          <div style={{ margin: '0.5rem 0', color: '#1976d2', fontWeight: 'bold', fontSize: '1.1rem' }}>
-            Antall elever i klassen: {classMap[form.class_id].total_students}
+          <div style={{ margin: '0.75rem 0', display: 'flex', alignItems: 'center', gap: 12, color: '#1976d2', fontWeight: 'bold', fontSize: '1.1rem' }}>
+            <ClassLogo className={classMap[form.class_id].name} size={46} />
+            <div>
+              <div>{classMap[form.class_id].name}</div>
+              <div>Antall elever i klassen: {classMap[form.class_id].total_students}</div>
+            </div>
           </div>
         )}
         <br />

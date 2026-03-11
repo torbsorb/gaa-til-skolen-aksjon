@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import API_BASE from './apiBase';
+import ClassLogo from './ClassLogo';
 
 
 function EditableTablePage() {
@@ -235,7 +236,12 @@ function EditableTablePage() {
         <tbody>
           {classes.map(cls => (
             <tr key={cls.id}>
-              <td style={{ whiteSpace: 'nowrap', color: '#111' }}>{cls.name} ({cls.total_students})</td>
+              <td style={{ whiteSpace: 'nowrap', color: '#111' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <ClassLogo className={cls.name} size={34} />
+                  <span>{cls.name} ({cls.total_students})</span>
+                </div>
+              </td>
               {days.map(day => (
                 <td key={day} style={{ background: getColumnBackground(day) }}>
                   <input

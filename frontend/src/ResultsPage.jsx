@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import API_BASE from './apiBase';
+import ClassLogo from './ClassLogo';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -305,8 +306,9 @@ function ResultsPage() {
                         return (
                           <div key={tier.rank} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', width: tier.width }}>
                             <div style={{ marginBottom: 18, minHeight: 62, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: 6, textAlign: 'center' }}>
-                              <div style={{ padding: '4px 10px', fontWeight: 800, fontSize: 16, lineHeight: 1.05, color: '#222', background: 'rgba(255,255,255,0.9)', borderRadius: 10, boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
-                                {entry.class_name}
+                              <div style={{ padding: '6px 10px', fontWeight: 800, fontSize: 16, lineHeight: 1.05, color: '#222', background: 'rgba(255,255,255,0.9)', borderRadius: 10, boxShadow: '0 2px 6px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                                <ClassLogo className={entry.class_name} size={38} />
+                                <span>{entry.class_name}</span>
                               </div>
                               <div style={{ fontWeight: 800, fontSize: 13, color: '#202020' }}>{entry.percent_walked.toFixed(1)}%</div>
                             </div>
@@ -335,7 +337,12 @@ function ResultsPage() {
                     <tbody>
                       {groupEntries.map((entry, i) => (
                         <tr key={entry.class_id} style={i < 3 ? { fontWeight: 'bold', color: '#111' } : { color: '#111' }}>
-                          <td style={{ color: '#111' }}>{entry.class_name}</td>
+                          <td style={{ color: '#111' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <ClassLogo className={entry.class_name} size={32} />
+                              <span>{entry.class_name}</span>
+                            </div>
+                          </td>
                           <td style={{ color: '#111' }}>{entry.percent_walked.toFixed(1)}%</td>
                         </tr>
                       ))}
