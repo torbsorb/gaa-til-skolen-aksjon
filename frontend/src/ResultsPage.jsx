@@ -164,6 +164,33 @@ function ResultsPage() {
   const groupEntries = currentGroup
     ? [...(simulatedGroupedLeaders[currentGroup] || [])].sort((a, b) => b.percent_walked - a.percent_walked)
     : [];
+  const podiumOrder = [1, 0, 2];
+  const podiumTiers = [
+    {
+      rank: 1,
+      medal: '🥇',
+      width: 108,
+      height: 82,
+      accentColor: '#edd04f',
+      numberColor: '#c79c12',
+    },
+    {
+      rank: 2,
+      medal: '🥈',
+      width: 96,
+      height: 62,
+      accentColor: '#d7d7d9',
+      numberColor: '#9b9ca0',
+    },
+    {
+      rank: 3,
+      medal: '🥉',
+      width: 96,
+      height: 52,
+      accentColor: '#e6af69',
+      numberColor: '#be7b31',
+    },
+  ];
 
   // Filter classes in the current group
   const groupClassIds = groupEntries.map((entry) => entry.class_id);
@@ -266,28 +293,36 @@ function ResultsPage() {
                   )}
                 </div>
                 <div style={{ flex: isWideLayout ? '0 0 300px' : '1 1 auto' }}>
-                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', width: '100%', marginBottom: 16 }}>
-                    {['🥇', '🥈', '🥉'].map((emoji, idx) => {
-                      const colors = ['#ffd700', '#b0bec5', '#cd7f32'];
-                      const entry = groupEntries[idx];
-                      if (!entry) return <div key={idx} style={{ width: 90 }} />;
-                      return (
-                        <div key={idx} style={{
-                          display: 'flex', flexDirection: 'column', alignItems: 'center',
-                          margin: '0 6px',
-                          background: colors[idx],
-                          borderRadius: 12,
-                          padding: 8,
-                          minWidth: 82,
-                          minHeight: 120,
-                          boxShadow: '0 2px 8px #8883'
-                        }}>
-                          <div style={{ fontSize: 42, marginBottom: 4 }}>{emoji}</div>
-                          <div style={{ fontWeight: 'bold', fontSize: 16 }}>{entry.class_name}</div>
-                          <div style={{ fontSize: 13 }}>{entry.percent_walked.toFixed(1)}%</div>
-                        </div>
-                      );
-                    })}
+                  <div style={{ marginBottom: 16, padding: '18px 10px 10px', borderRadius: 16, background: 'linear-gradient(180deg, #f4f0e7 0%, #efe9de 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7), 0 6px 16px rgba(0,0,0,0.08)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 2, width: '100%', minHeight: 154 }}>
+                      {podiumOrder.map((entryIndex) => {
+                        const entry = groupEntries[entryIndex];
+                        const tier = podiumTiers[entryIndex];
+                        if (!entry) {
+                          return <div key={tier.rank} style={{ width: tier.width, height: tier.height + 52 }} />;
+                        }
+
+                        return (
+                          <div key={tier.rank} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', width: tier.width }}>
+                            <div style={{ marginBottom: 18, minHeight: 62, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: 6, textAlign: 'center' }}>
+                              <div style={{ padding: '4px 10px', fontWeight: 800, fontSize: 16, lineHeight: 1.05, color: '#222', background: 'rgba(255,255,255,0.9)', borderRadius: 10, boxShadow: '0 2px 6px rgba(0,0,0,0.06)' }}>
+                                {entry.class_name}
+                              </div>
+                              <div style={{ fontWeight: 800, fontSize: 13, color: '#202020' }}>{entry.percent_walked.toFixed(1)}%</div>
+                            </div>
+                            <div style={{ position: 'relative', width: tier.width, height: tier.height, background: 'linear-gradient(135deg, #f6f6f6 0%, #ffffff 38%, #eeeeee 39%, #fbfbfb 100%)', border: '1px solid #d9d9d9', borderBottomColor: '#c7c7c7', boxShadow: '0 8px 14px rgba(0,0,0,0.08)' }}>
+                              <div style={{ position: 'absolute', top: -12, left: 8, right: 8, height: 18, background: tier.accentColor, transform: 'skewX(-24deg)' }} />
+                              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(120deg, transparent 0%, transparent 38%, rgba(255,255,255,0.5) 39%, transparent 56%)' }} />
+                              <div style={{ position: 'absolute', left: '50%', bottom: tier.rank === 3 ? 10 : 13, transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ fontSize: tier.rank === 1 ? 32 : 28, lineHeight: 1 }}>{tier.medal}</div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div style={{ height: 1, marginTop: 0, background: 'rgba(0,0,0,0.12)' }} />
+                    <div style={{ height: 20, marginTop: 8, borderRadius: '50%', background: 'radial-gradient(ellipse at center, rgba(210,210,210,0.34) 0%, rgba(210,210,210,0.12) 45%, rgba(210,210,210,0) 72%)' }} />
                   </div>
 
                   <table style={{ width: '100%', borderCollapse: 'collapse', background: '#f7faff', borderRadius: 8, overflow: 'hidden', color: '#111' }}>
