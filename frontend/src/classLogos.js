@@ -1,3 +1,5 @@
+import API_BASE from './apiBase';
+
 const CLASS_LOGOS = {
   '1A': '/class-logos/1A.svg',
   '1C': '/class-logos/1C.svg',
@@ -19,8 +21,41 @@ const CLASS_LOGOS = {
   '7C': '/class-logos/7C.svg',
 };
 
+let remoteClassLogos = {};
+let remoteLoadPromise = null;
+const subscribers = new Set();
+
+function notifySubscribers() {
+  subscribers.forEach((callback) => callback());
+}
+
+export async function loadRemoteClassLogos(force = false) {
+  if (!force && remoteLoadPromise) {
+    return remoteLoadPromise;
+  }
+
+  remoteLoadPromise = fetch(`${API_BASE}/admin/class-logo-map`, { cache: 'no-store' })
+    .then((res) => {
+      if (!res.ok) throw new Error('Could not fetch class logo map');
+      return res.json();
+    })
+    .then((data) => {
+      remoteClassLogos = data && typeof data.logos === 'object' && data.logos ? data.logos : {};
+      notifySubscribers();
+      return remoteClassLogos;
+    })
+    .catch(() => remoteClassLogos);
+
+  return remoteLoadPromise;
+}
+
+export function subscribeToClassLogoUpdates(callback) {
+  subscribers.add(callback);
+  return () => subscribers.delete(callback);
+}
+
 export function getClassLogo(className) {
-  return CLASS_LOGOS[className] || '/class-logos/default.svg';
+  return remoteClassLogos[className] || CLASS_LOGOS[className] || '/class-logos/default.svg';
 }
 
 export default CLASS_LOGOS;

@@ -58,6 +58,7 @@ function LandingPage() {
       <p style={{ marginTop: 0, color: '#444' }}>Verktøy for registrering og administrasjon:</p>
 
       <Link to="/secretTeacherPortal273892/edit-table" style={linkStyle}>Registreringstabell (hovedinput)</Link>
+      <Link to="/secretTeacherPortal273892/class-logos" style={linkStyle}>Klassebilder (last opp / oppdater)</Link>
       <Link to="/results" style={linkStyle}>Resultater (visning)</Link>
       <Link to="/secretTeacherPortal273892/survey" style={linkStyle}>Daglig registrering (enkelt skjema)</Link>
 

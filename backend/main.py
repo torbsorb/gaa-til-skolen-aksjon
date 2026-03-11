@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException, Body, Request
+from fastapi import FastAPI, Depends, HTTPException, Body, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from class_api import router as class_router
 from class_map import class_map, competition_map
 from sqlalchemy.orm import Session
@@ -8,14 +9,29 @@ from database import SessionLocal
 from models import SurveyResult, SchoolClass, ClassGroup, CellEditAudit
 from schemas import SurveyResultCreate, LeaderboardEntry
 from datetime import date, timedelta
+from pathlib import Path
+from urllib.parse import quote
+import shutil
 import os
 
 APP_MODE = os.getenv("APP_MODE", "preview").strip().lower()
 if APP_MODE not in {"preview", "campaign"}:
     APP_MODE = "preview"
 
+BASE_DIR = Path(__file__).resolve().parent
+LOGO_UPLOAD_DIR = BASE_DIR / "uploads" / "class-logos"
+LOGO_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+
+ALLOWED_CLASS_NAMES = set()
+for class_set in class_map:
+    for class_dict in class_set:
+        for class_name in class_dict.keys():
+            ALLOWED_CLASS_NAMES.add(class_name)
+
 app = FastAPI()
 app.include_router(class_router)
+app.mount("/uploaded-class-logos", StaticFiles(directory=str(LOGO_UPLOAD_DIR)), name="uploaded-class-logos")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,6 +47,21 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def get_uploaded_logo_file(class_name: str) -> Path | None:
+    for ext in ALLOWED_IMAGE_EXTENSIONS:
+        candidate = LOGO_UPLOAD_DIR / f"{class_name}{ext}"
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def build_uploaded_logo_url(request: Request, class_name: str, file_path: Path) -> str:
+    version = int(file_path.stat().st_mtime)
+    base = str(request.base_url).rstrip("/")
+    safe_name = quote(class_name)
+    return f"{base}/uploaded-class-logos/{safe_name}{file_path.suffix}?v={version}"
 
 
 def ensure_reference_data(db: Session) -> bool:
@@ -152,6 +183,75 @@ def app_config():
     return {
         "app_mode": APP_MODE,
         "simulation_enabled": APP_MODE == "preview",
+    }
+
+
+@app.get("/admin/class-logo-map")
+def class_logo_map(request: Request):
+    logo_map = {}
+    for class_name in sorted(ALLOWED_CLASS_NAMES):
+        file_path = get_uploaded_logo_file(class_name)
+        if file_path:
+            logo_map[class_name] = build_uploaded_logo_url(request, class_name, file_path)
+    return {"logos": logo_map}
+
+
+@app.post("/admin/class-logo/{class_name}")
+def upload_class_logo(class_name: str, request: Request, file: UploadFile = File(...)):
+    normalized_class_name = class_name.strip().upper()
+    if normalized_class_name not in ALLOWED_CLASS_NAMES:
+        raise HTTPException(status_code=404, detail="Unknown class")
+
+    if file.content_type and not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File must be an image")
+
+    ext = Path(file.filename or "").suffix.lower()
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        content_type_map = {
+            "image/jpeg": ".jpg",
+            "image/png": ".png",
+            "image/webp": ".webp",
+            "image/gif": ".gif",
+        }
+        ext = content_type_map.get(file.content_type or "", "")
+
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Unsupported image format")
+
+    for existing_ext in ALLOWED_IMAGE_EXTENSIONS:
+        existing_file = LOGO_UPLOAD_DIR / f"{normalized_class_name}{existing_ext}"
+        if existing_file.exists():
+            existing_file.unlink()
+
+    output_file = LOGO_UPLOAD_DIR / f"{normalized_class_name}{ext}"
+    with output_file.open("wb") as out:
+        shutil.copyfileobj(file.file, out)
+
+    return {
+        "success": True,
+        "class_name": normalized_class_name,
+        "logo_url": build_uploaded_logo_url(request, normalized_class_name, output_file),
+    }
+
+
+@app.delete("/admin/class-logo/{class_name}")
+def reset_class_logo(class_name: str):
+    normalized_class_name = class_name.strip().upper()
+    if normalized_class_name not in ALLOWED_CLASS_NAMES:
+        raise HTTPException(status_code=404, detail="Unknown class")
+
+    removed = False
+    for existing_ext in ALLOWED_IMAGE_EXTENSIONS:
+        existing_file = LOGO_UPLOAD_DIR / f"{normalized_class_name}{existing_ext}"
+        if existing_file.exists():
+            existing_file.unlink()
+            removed = True
+
+    return {
+        "success": True,
+        "class_name": normalized_class_name,
+        "reset_to_default": True,
+        "removed_uploaded_file": removed,
     }
 
 

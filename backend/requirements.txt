@@ -4,3 +4,4 @@ sqlalchemy
 pydantic
 sqlite-utils
 psycopg2-binary
+python-multipart

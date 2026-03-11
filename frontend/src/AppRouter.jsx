@@ -4,6 +4,7 @@ import SurveyPage from './SurveyPage';
 import ResultsPage from './ResultsPage';
 import EditableTablePage from './EditableTablePage';
 import LandingPage from './LandingPage';
+import ClassLogoManagerPage from './ClassLogoManagerPage';
 
 const TEACHER_PORTAL_PATH = '/secretTeacherPortal273892';
 
@@ -17,6 +18,7 @@ function AppRouter() {
         <Route path={TEACHER_PORTAL_PATH} element={<LandingPage />} />
         <Route path={`${TEACHER_PORTAL_PATH}/survey`} element={<SurveyPage />} />
         <Route path={`${TEACHER_PORTAL_PATH}/edit-table`} element={<EditableTablePage />} />
+        <Route path={`${TEACHER_PORTAL_PATH}/class-logos`} element={<ClassLogoManagerPage />} />
 
         <Route path="/survey" element={<Navigate to="/" replace />} />
         <Route path="/edit-table" element={<Navigate to="/" replace />} />

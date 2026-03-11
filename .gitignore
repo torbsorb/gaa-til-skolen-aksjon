@@ -7,3 +7,6 @@ backend/.env
 
 # Local SQLite fallback db
 backend/survey.db
+
+# Local uploaded class logos (teacher image uploads)
+backend/uploads/

@@ -1,10 +1,19 @@
 import { useEffect, useState } from 'react';
 
-import { getClassLogo } from './classLogos';
+import { getClassLogo, loadRemoteClassLogos, subscribeToClassLogoUpdates } from './classLogos';
 
 function ClassLogo({ className, size = 36 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [, setLogoVersion] = useState(0);
   const imageSrc = getClassLogo(className);
+
+  useEffect(() => {
+    loadRemoteClassLogos();
+    const unsubscribe = subscribeToClassLogoUpdates(() => {
+      setLogoVersion((prev) => prev + 1);
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (!isOpen) {
