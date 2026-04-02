@@ -133,8 +133,8 @@ function ClassLogo({ className, size = 36 }) {
           >
             <div
               style={{
-                maxWidth: 'min(92vw, 960px)',
-                maxHeight: '78vh',
+                width: 'min(92vw, 960px)',
+                height: 'min(78vh, 960px)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -142,6 +142,7 @@ function ClassLogo({ className, size = 36 }) {
                 borderRadius: 24,
                 background: '#fff',
                 boxShadow: '0 28px 70px rgba(0,0,0,0.35)',
+                boxSizing: 'border-box',
               }}
             >
               <img
@@ -149,10 +150,8 @@ function ClassLogo({ className, size = 36 }) {
                 alt={`${className} logo`}
                 style={{
                   display: 'block',
-                  maxWidth: '100%',
-                  maxHeight: 'calc(78vh - 24px)',
-                  width: 'auto',
-                  height: 'auto',
+                  width: '100%',
+                  height: '100%',
                   objectFit: 'contain',
                   borderRadius: 12,
                 }}
