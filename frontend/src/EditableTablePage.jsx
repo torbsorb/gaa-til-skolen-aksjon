@@ -170,8 +170,58 @@ function EditableTablePage() {
     return '#e2e8f0';
   };
 
+  const renderTable = (weekDays, weekLabel) => (
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <h3 style={{ marginTop: 0, color: '#111' }}>{weekLabel}</h3>
+      <table style={{ width: '100%', borderCollapse: 'collapse', color: '#111' }}>
+        <thead>
+          <tr>
+            <th style={{ color: '#111' }}>Klasse</th>
+            {weekDays.map(day => (
+              <th key={day} style={{ background: getColumnBackground(day) }}>
+                <div style={{ color: '#111' }}>{getWeekdayForDay(day)}</div>
+                <div style={{ fontSize: 12, fontWeight: 400, color: '#111' }}>{getDateForDay(day)}</div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {classes.map(cls => (
+            <tr key={cls.id}>
+              <td style={{ whiteSpace: 'nowrap', color: '#111' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <ClassLogo className={cls.name} size={34} />
+                  <span>{cls.name} ({cls.total_students})</span>
+                </div>
+              </td>
+              {weekDays.map(day => (
+                <td key={day} style={{ background: getColumnBackground(day) }}>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={tableData[cls.id]?.[day] || ''}
+                    disabled={day > currentCompetitionDay}
+                    onChange={e => handleChange(cls.id, day, e.target.value, cls.total_students)}
+                    style={{
+                      width: 60,
+                      background: day > currentCompetitionDay ? '#cbd5e1' : getCellBackground(cls.id, day),
+                      color: '#111',
+                      border: '1px solid #bbb',
+                      opacity: day > currentCompetitionDay ? 0.75 : 1,
+                      cursor: day > currentCompetitionDay ? 'not-allowed' : 'text'
+                    }}
+                  />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
   return (
-    <div style={{ maxWidth: 900, margin: '2rem auto', padding: '2rem', border: '1px solid #ccc', borderRadius: 8, color: '#111', background: '#f9f9ff' }}>
+    <div style={{ maxWidth: 1400, margin: '2rem auto', padding: '2rem', border: '1px solid #ccc', borderRadius: 8, color: '#111', background: '#f9f9ff' }}>
       <h2>Redigerbare dagsresultater</h2>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 10 }}>
         {simulationEnabled ? (
@@ -221,50 +271,10 @@ function EditableTablePage() {
           {cleanStatus && <div style={{ marginTop: 6, color: '#222' }}>{cleanStatus}</div>}
         </div>
       )}
-      <table style={{ width: '100%', borderCollapse: 'collapse', color: '#111' }}>
-        <thead>
-          <tr>
-            <th style={{ color: '#111' }}>Klasse</th>
-            {days.map(day => (
-              <th key={day} style={{ background: getColumnBackground(day) }}>
-                <div style={{ color: '#111' }}>{getWeekdayForDay(day)}</div>
-                <div style={{ fontSize: 12, fontWeight: 400, color: '#111' }}>{getDateForDay(day)}</div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {classes.map(cls => (
-            <tr key={cls.id}>
-              <td style={{ whiteSpace: 'nowrap', color: '#111' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <ClassLogo className={cls.name} size={34} />
-                  <span>{cls.name} ({cls.total_students})</span>
-                </div>
-              </td>
-              {days.map(day => (
-                <td key={day} style={{ background: getColumnBackground(day) }}>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={tableData[cls.id]?.[day] || ''}
-                    disabled={day > currentCompetitionDay}
-                    onChange={e => handleChange(cls.id, day, e.target.value, cls.total_students)}
-                    style={{
-                      width: 60,
-                      background: day > currentCompetitionDay ? '#cbd5e1' : getCellBackground(cls.id, day),
-                      color: '#111',
-                      border: '1px solid #bbb',
-                      opacity: day > currentCompetitionDay ? 0.75 : 1,
-                      cursor: day > currentCompetitionDay ? 'not-allowed' : 'text'
-                    }}
-                  />
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div style={{ display: 'flex', gap: 20, overflow: 'auto', marginBottom: '1rem' }}>
+        {renderTable([1, 2, 3, 4, 5], 'Uke 1 (13–17 april)')}
+        {renderTable([6, 7, 8, 9, 10], 'Uke 2 (20–24 april)')}
+      </div>
       <div style={{ marginTop: '1rem', color: status.includes('feilet') ? '#b00020' : '#1b5e20' }}>{status}</div>
     </div>
   );

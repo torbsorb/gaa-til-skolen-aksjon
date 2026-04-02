@@ -1,24 +1,25 @@
 import API_BASE from './apiBase';
 
+// Default class logos are now loaded from the API
 const CLASS_LOGOS = {
-  '1A': '/class-logos/1A.svg',
-  '1C': '/class-logos/1C.svg',
-  '2A': '/class-logos/2A.svg',
-  '2B': '/class-logos/2B.svg',
-  '2C': '/class-logos/2C.svg',
-  '3A': '/class-logos/3A.svg',
-  '3B': '/class-logos/3B.svg',
-  '3C': '/class-logos/3C.svg',
-  '4A': '/class-logos/4A.svg',
-  '4C': '/class-logos/4C.svg',
-  '5A': '/class-logos/5A.svg',
-  '5B': '/class-logos/5B.svg',
-  '5C': '/class-logos/5C.svg',
-  '6A': '/class-logos/6A.svg',
-  '6C': '/class-logos/6C.svg',
-  '7A': '/class-logos/7A.svg',
-  '7B': '/class-logos/7B.svg',
-  '7C': '/class-logos/7C.svg',
+  '1A': null,
+  '1C': null,
+  '2A': null,
+  '2B': null,
+  '2C': null,
+  '3A': null,
+  '3B': null,
+  '3C': null,
+  '4A': null,
+  '4C': null,
+  '5A': null,
+  '5B': null,
+  '5C': null,
+  '6A': null,
+  '6C': null,
+  '7A': null,
+  '7B': null,
+  '7C': null,
 };
 
 let remoteClassLogos = {};
@@ -55,7 +56,12 @@ export function subscribeToClassLogoUpdates(callback) {
 }
 
 export function getClassLogo(className) {
-  return remoteClassLogos[className] || CLASS_LOGOS[className] || '/class-logos/default.svg';
+  // Check remote (database-backed) logos first
+  if (remoteClassLogos[className]) {
+    return remoteClassLogos[className];
+  }
+  // Fallback to static default from public folder
+  return `/class-logos/${className}.svg`;
 }
 
 export default CLASS_LOGOS;

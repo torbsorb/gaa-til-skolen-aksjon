@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, Body, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from class_api import router as class_router
 from class_map import class_map, competition_map
 from sqlalchemy.orm import Session
@@ -10,7 +9,7 @@ from models import SurveyResult, SchoolClass, ClassGroup, CellEditAudit
 from schemas import SurveyResultCreate, LeaderboardEntry
 from datetime import date, timedelta
 from pathlib import Path
-from urllib.parse import quote
+import base64
 import shutil
 import os
 
@@ -19,9 +18,7 @@ if APP_MODE not in {"preview", "campaign"}:
     APP_MODE = "preview"
 
 BASE_DIR = Path(__file__).resolve().parent
-LOGO_UPLOAD_DIR = BASE_DIR / "uploads" / "class-logos"
-LOGO_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}
 
 ALLOWED_CLASS_NAMES = set()
 for class_set in class_map:
@@ -31,7 +28,6 @@ for class_set in class_map:
 
 app = FastAPI()
 app.include_router(class_router)
-app.mount("/uploaded-class-logos", StaticFiles(directory=str(LOGO_UPLOAD_DIR)), name="uploaded-class-logos")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -49,19 +45,70 @@ def get_db():
         db.close()
 
 
-def get_uploaded_logo_file(class_name: str) -> Path | None:
-    for ext in ALLOWED_IMAGE_EXTENSIONS:
-        candidate = LOGO_UPLOAD_DIR / f"{class_name}{ext}"
-        if candidate.exists():
-            return candidate
+def get_default_logo_data(class_name: str) -> bytes | None:
+    """Load default SVG logo from frontend public folder and return as binary."""
+    svg_path = BASE_DIR.parent / "frontend" / "public" / "class-logos" / f"{class_name}.svg"
+    if svg_path.exists():
+        with open(svg_path, "rb") as f:
+            return f.read()
     return None
 
 
-def build_uploaded_logo_url(request: Request, class_name: str, file_path: Path) -> str:
-    version = int(file_path.stat().st_mtime)
-    base = str(request.base_url).rstrip("/")
-    safe_name = quote(class_name)
-    return f"{base}/uploaded-class-logos/{safe_name}{file_path.suffix}?v={version}"
+def calendar_day_for_working_day(working_day_num: int, start_date: date) -> date:
+    """
+    Convert abstract working day number (1-10) to actual calendar date (Mon-Fri only).
+    Skips weekends.
+    
+    Example: With start_date=2026-04-13 (Monday):
+    - working_day_num 1 → 2026-04-13 (Mon)
+    - working_day_num 5 → 2026-04-17 (Fri)
+    - working_day_num 6 → 2026-04-20 (Mon)
+    - working_day_num 10 → 2026-04-24 (Fri)
+    """
+    current = start_date
+    working_days_seen = 0
+    
+    while working_days_seen < working_day_num:
+        # weekday() returns 0-6 (Mon-Sun), so 5=Sat, 6=Sun
+        if current.weekday() < 5:  # Monday to Friday
+            working_days_seen += 1
+            if working_days_seen == working_day_num:
+                return current
+        current += timedelta(days=1)
+    
+    return current
+
+
+def get_all_default_logos() -> dict[str, bytes]:
+    """Load all default SVG logos from frontend public folder."""
+    logos = {}
+    class_logos_dir = BASE_DIR.parent / "frontend" / "public" / "class-logos"
+    for class_name in sorted(ALLOWED_CLASS_NAMES):
+        svg_path = class_logos_dir / f"{class_name}.svg"
+        if svg_path.exists():
+            with open(svg_path, "rb") as f:
+                logos[class_name] = f.read()
+    return logos
+
+
+def detect_image_mime_type(image_data: bytes) -> str:
+    """Infer the MIME type from raw image bytes so uploaded photos render correctly."""
+    if not image_data:
+        return "application/octet-stream"
+
+    stripped = image_data.lstrip()
+    if stripped.startswith(b"<svg") or b"<svg" in stripped[:300]:
+        return "image/svg+xml"
+    if image_data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if image_data.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if image_data.startswith((b"GIF87a", b"GIF89a")):
+        return "image/gif"
+    if image_data[:4] == b"RIFF" and image_data[8:12] == b"WEBP":
+        return "image/webp"
+
+    return "application/octet-stream"
 
 
 def ensure_reference_data(db: Session) -> bool:
@@ -91,6 +138,7 @@ def ensure_reference_data(db: Session) -> bool:
                 class_totals[class_name] = total_students
 
     existing_class_names = {c.name for c in db.query(SchoolClass).all()}
+    default_logos = get_all_default_logos()
     for class_name, total_students in class_totals.items():
         if class_name in existing_class_names:
             continue
@@ -105,6 +153,7 @@ def ensure_reference_data(db: Session) -> bool:
                 name=class_name,
                 group_id=group_obj.id,
                 total_students=total_students,
+                logo_data=default_logos.get(class_name),
             )
         )
         changed = True
@@ -116,7 +165,7 @@ def ensure_reference_data(db: Session) -> bool:
 
 
 def seed_preview_data(db: Session, force: bool = False) -> bool:
-    """Populate 10 days of realistic fake survey data for preview/demo mode."""
+    """Populate 10 working days of realistic fake survey data for preview/demo mode."""
     if not force and db.query(SurveyResult).count() > 0:
         return False  # Already has data, don't overwrite.
 
@@ -127,14 +176,14 @@ def seed_preview_data(db: Session, force: bool = False) -> bool:
     if not classes:
         return False
 
-    base_date = date(2026, 3, 1)
+    base_date = date(2026, 4, 13)  # Monday, start of campaign
     for school_class in classes:
         # Each class has its own "baseline" walk rate (60–95 %) with per-day noise.
         baseline = random.uniform(0.60, 0.95)
-        for day in range(1, 11):
+        for working_day in range(1, 11):
             rate = max(0.0, min(1.0, baseline + random.uniform(-0.10, 0.10)))
             walked = round(school_class.total_students * rate)
-            target_date = base_date + timedelta(days=day - 1)
+            target_date = calendar_day_for_working_day(working_day, base_date)
             db.add(
                 SurveyResult(
                     class_id=school_class.id,
@@ -150,8 +199,14 @@ def seed_preview_data(db: Session, force: bool = False) -> bool:
 
 @app.on_event("startup")
 def bootstrap_reference_data():
+    global APP_MODE
     db = SessionLocal()
     try:
+        # Auto-switch to campaign mode on/after Apr 13 if not explicitly set
+        campaign_start = date(2026, 4, 13)
+        if date.today() >= campaign_start and os.getenv("APP_MODE") is None:
+            APP_MODE = "campaign"
+        
         if ensure_reference_data(db):
             print("Bootstrapped missing class/group reference data.")
         if APP_MODE == "preview":
@@ -187,17 +242,20 @@ def app_config():
 
 
 @app.get("/admin/class-logo-map")
-def class_logo_map(request: Request):
+def class_logo_map(db: Session = Depends(get_db)):
+    """Return map of class names to data URLs from database-backed logos."""
     logo_map = {}
-    for class_name in sorted(ALLOWED_CLASS_NAMES):
-        file_path = get_uploaded_logo_file(class_name)
-        if file_path:
-            logo_map[class_name] = build_uploaded_logo_url(request, class_name, file_path)
+    for school_class in db.query(SchoolClass).all():
+        if school_class.logo_data:
+            b64_data = base64.b64encode(school_class.logo_data).decode("utf-8")
+            mime_type = detect_image_mime_type(school_class.logo_data)
+            logo_map[school_class.name] = f"data:{mime_type};base64,{b64_data}"
     return {"logos": logo_map}
 
 
 @app.post("/admin/class-logo/{class_name}")
-def upload_class_logo(class_name: str, request: Request, file: UploadFile = File(...)):
+def upload_class_logo(class_name: str, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """Upload a logo for a class and store in database."""
     normalized_class_name = class_name.strip().upper()
     if normalized_class_name not in ALLOWED_CLASS_NAMES:
         raise HTTPException(status_code=404, detail="Unknown class")
@@ -212,46 +270,51 @@ def upload_class_logo(class_name: str, request: Request, file: UploadFile = File
             "image/png": ".png",
             "image/webp": ".webp",
             "image/gif": ".gif",
+            "image/svg+xml": ".svg",
         }
         ext = content_type_map.get(file.content_type or "", "")
 
     if ext not in ALLOWED_IMAGE_EXTENSIONS:
         raise HTTPException(status_code=400, detail="Unsupported image format")
 
-    for existing_ext in ALLOWED_IMAGE_EXTENSIONS:
-        existing_file = LOGO_UPLOAD_DIR / f"{normalized_class_name}{existing_ext}"
-        if existing_file.exists():
-            existing_file.unlink()
-
-    output_file = LOGO_UPLOAD_DIR / f"{normalized_class_name}{ext}"
-    with output_file.open("wb") as out:
-        shutil.copyfileobj(file.file, out)
+    # Read the binary file content
+    file_content = file.file.read()
+    
+    # Find the school class and update its logo_data
+    school_class = db.query(SchoolClass).filter(SchoolClass.name == normalized_class_name).first()
+    if not school_class:
+        raise HTTPException(status_code=404, detail="Class not found in database")
+    
+    school_class.logo_data = file_content
+    db.commit()
 
     return {
         "success": True,
         "class_name": normalized_class_name,
-        "logo_url": build_uploaded_logo_url(request, normalized_class_name, output_file),
+        "message": "Logo uploaded successfully",
     }
 
 
 @app.delete("/admin/class-logo/{class_name}")
-def reset_class_logo(class_name: str):
+def reset_class_logo(class_name: str, db: Session = Depends(get_db)):
+    """Reset class logo to default by loading original SVG into database."""
     normalized_class_name = class_name.strip().upper()
     if normalized_class_name not in ALLOWED_CLASS_NAMES:
         raise HTTPException(status_code=404, detail="Unknown class")
 
-    removed = False
-    for existing_ext in ALLOWED_IMAGE_EXTENSIONS:
-        existing_file = LOGO_UPLOAD_DIR / f"{normalized_class_name}{existing_ext}"
-        if existing_file.exists():
-            existing_file.unlink()
-            removed = True
+    school_class = db.query(SchoolClass).filter(SchoolClass.name == normalized_class_name).first()
+    if not school_class:
+        raise HTTPException(status_code=404, detail="Class not found in database")
+    
+    # Load default logo from frontend folder
+    default_logo = get_default_logo_data(normalized_class_name)
+    school_class.logo_data = default_logo
+    db.commit()
 
     return {
         "success": True,
         "class_name": normalized_class_name,
         "reset_to_default": True,
-        "removed_uploaded_file": removed,
     }
 
 
@@ -347,17 +410,40 @@ def get_standings(db: Session = Depends(get_db)):
 
 
 # --- Editable Table Endpoints ---
+def working_day_for_calendar_date(calendar_date: date, start_date: date) -> int | None:
+    """
+    Convert calendar date back to working day number (1-10).
+    Returns None if the date is not a working day or outside the 10-day window.
+    """
+    if calendar_date < start_date:
+        return None
+    
+    current = start_date
+    working_day = 0
+    
+    while current <= calendar_date:
+        if current.weekday() < 5:  # Monday to Friday
+            working_day += 1
+            if current == calendar_date:
+                return working_day if working_day <= 10 else None
+        if working_day > 10:
+            return None
+        current += timedelta(days=1)
+    
+    return None
+
+
 @app.get("/results-table")
 def get_results_table(db: Session = Depends(get_db)):
     # Get all classes
     classes = db.query(SchoolClass).all()
     # Get all survey results
     results = db.query(SurveyResult).all()
-    # Determine the base date (earliest date in results, or today if none)
+    # Determine the base date (earliest date in results, or default to Apr 13)
     if results:
         base_date = min(r.date for r in results)
     else:
-        base_date = date.today()
+        base_date = date(2026, 4, 13)
     # Build dicts: {class_id: {day: value}}
     table = {}
     edit_counts = {}
@@ -368,14 +454,16 @@ def get_results_table(db: Session = Depends(get_db)):
             table[c.id][str(day)] = ""
             edit_counts[c.id][str(day)] = 0
     for r in results:
-        day_num = (r.date - base_date).days + 1
-        if 1 <= day_num <= 10:
+        # Convert calendar date to working day number
+        day_num = working_day_for_calendar_date(r.date, base_date)
+        if day_num and 1 <= day_num <= 10:
             table[r.class_id][str(day_num)] = r.walked_count
 
     audits = db.query(CellEditAudit).all()
     for a in audits:
-        day_num = (a.date - base_date).days + 1
-        if 1 <= day_num <= 10 and a.class_id in edit_counts:
+        # Convert calendar date to working day number
+        day_num = working_day_for_calendar_date(a.date, base_date)
+        if day_num and 1 <= day_num <= 10 and a.class_id in edit_counts:
             edit_counts[a.class_id][str(day_num)] = a.edit_count
 
     return {"table": table, "edit_counts": edit_counts, "base_date": str(base_date)}
@@ -389,10 +477,11 @@ def upsert_survey(
     walked_count: int = Body(...),
     db: Session = Depends(get_db),
 ):
-    # Use earliest existing date as day 1, or today if no rows exist yet.
+    # Use earliest existing date as day 1, or Apr 13 if no rows exist yet.
     first_result = db.query(SurveyResult).order_by(SurveyResult.date).first()
-    base_date = first_result.date if first_result else date.today()
-    target_date = base_date + timedelta(days=day - 1)
+    base_date = first_result.date if first_result else date(2026, 4, 13)
+    # Convert working day number to calendar date (skipping weekends)
+    target_date = calendar_day_for_working_day(day, base_date)
     # Find or create the result
     result = (
         db.query(SurveyResult)

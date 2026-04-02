@@ -62,7 +62,8 @@ function ClassLogo({ className, size = 36 }) {
             width: size,
             height: size,
             borderRadius: 12,
-            objectFit: 'cover',
+            objectFit: 'contain',
+            background: '#fff',
             flexShrink: 0,
             boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
           }}
@@ -122,9 +123,11 @@ function ClassLogo({ className, size = 36 }) {
               alt={`${className} logo`}
               style={{
                 display: 'block',
-                width: 'min(92vw, 960px)',
+                width: 'auto',
+                maxWidth: 'min(92vw, 960px)',
                 maxHeight: '78vh',
                 height: 'auto',
+                objectFit: 'contain',
                 borderRadius: 24,
                 boxShadow: '0 28px 70px rgba(0,0,0,0.35)',
                 background: '#fff',

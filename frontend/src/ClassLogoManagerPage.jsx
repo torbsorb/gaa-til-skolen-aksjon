@@ -151,7 +151,14 @@ function ClassLogoManagerPage() {
                   <img
                     src={getClassLogo(className)}
                     alt={`${className} logo`}
-                    style={{ width: 86, height: 86, borderRadius: 16, objectFit: 'cover', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
+                    style={{
+                      width: 86,
+                      height: 86,
+                      borderRadius: 16,
+                      objectFit: 'contain',
+                      background: '#fff',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                    }}
                   />
                 </button>
 

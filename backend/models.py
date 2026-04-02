@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -17,6 +17,7 @@ class SchoolClass(Base):
     name = Column(String, nullable=False)
     group_id = Column(Integer, ForeignKey("class_groups.id"))
     total_students = Column(Integer, nullable=False)
+    logo_data = Column(LargeBinary, nullable=True)  # Stores uploaded logo or None for default
     group = relationship("ClassGroup", back_populates="classes")
     # Relationship: survey results
     results = relationship("SurveyResult", back_populates="school_class")
