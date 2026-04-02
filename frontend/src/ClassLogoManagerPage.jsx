@@ -148,18 +148,31 @@ function ClassLogoManagerPage() {
                     cursor: isUploading ? 'wait' : 'pointer',
                   }}
                 >
-                  <img
-                    src={getClassLogo(className)}
-                    alt={`${className} logo`}
+                  <span
                     style={{
                       width: 86,
                       height: 86,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
                       borderRadius: 16,
-                      objectFit: 'contain',
                       background: '#fff',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
                     }}
-                  />
+                  >
+                    <img
+                      src={getClassLogo(className)}
+                      alt={`${className} logo`}
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        width: 'auto',
+                        height: 'auto',
+                        objectFit: 'contain',
+                      }}
+                    />
+                  </span>
                 </button>
 
                 <input

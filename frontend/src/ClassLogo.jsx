@@ -53,21 +53,34 @@ function ClassLogo({ className, size = 36 }) {
           borderRadius: 12,
         }}
       >
-        <img
-          src={imageSrc}
-          alt={`${className} logo`}
-          width={size}
-          height={size}
+        <span
           style={{
             width: size,
             height: size,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
             borderRadius: 12,
-            objectFit: 'contain',
             background: '#fff',
-            flexShrink: 0,
             boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
           }}
-        />
+        >
+          <img
+            src={imageSrc}
+            alt={`${className} logo`}
+            width={size}
+            height={size}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              objectFit: 'contain',
+              flexShrink: 0,
+            }}
+          />
+        </span>
       </button>
 
       {isOpen && (
@@ -118,21 +131,33 @@ function ClassLogo({ className, size = 36 }) {
               maxHeight: '100%',
             }}
           >
-            <img
-              src={imageSrc}
-              alt={`${className} logo`}
+            <div
               style={{
-                display: 'block',
-                width: 'auto',
                 maxWidth: 'min(92vw, 960px)',
                 maxHeight: '78vh',
-                height: 'auto',
-                objectFit: 'contain',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 12,
                 borderRadius: 24,
-                boxShadow: '0 28px 70px rgba(0,0,0,0.35)',
                 background: '#fff',
+                boxShadow: '0 28px 70px rgba(0,0,0,0.35)',
               }}
-            />
+            >
+              <img
+                src={imageSrc}
+                alt={`${className} logo`}
+                style={{
+                  display: 'block',
+                  maxWidth: '100%',
+                  maxHeight: 'calc(78vh - 24px)',
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  borderRadius: 12,
+                }}
+              />
+            </div>
             <div style={{ color: '#fff', fontWeight: 700, fontSize: 18, textAlign: 'center' }}>
               {className}
             </div>
