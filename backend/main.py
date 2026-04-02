@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from class_api import router as class_router
 from class_map import class_map, competition_map
 from sqlalchemy.orm import Session
-from sqlalchemy import func
-from database import SessionLocal
+from sqlalchemy import func, inspect, text
+from database import SessionLocal, engine, DATABASE_URL
 from models import SurveyResult, SchoolClass, ClassGroup, CellEditAudit
 from schemas import SurveyResultCreate, LeaderboardEntry
 from datetime import date, timedelta
@@ -18,6 +18,7 @@ if APP_MODE not in {"preview", "campaign"}:
     APP_MODE = "preview"
 
 BASE_DIR = Path(__file__).resolve().parent
+LEGACY_LOGO_UPLOAD_DIR = BASE_DIR / "uploads" / "class-logos"
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}
 
 ALLOWED_CLASS_NAMES = set()
@@ -52,6 +53,30 @@ def get_default_logo_data(class_name: str) -> bytes | None:
         with open(svg_path, "rb") as f:
             return f.read()
     return None
+
+
+def get_legacy_uploaded_logo_file(class_name: str) -> Path | None:
+    """Find legacy filesystem upload if one exists from the earlier storage approach."""
+    for ext in ALLOWED_IMAGE_EXTENSIONS:
+        candidate = LEGACY_LOGO_UPLOAD_DIR / f"{class_name}{ext}"
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def ensure_logo_data_column_exists() -> bool:
+    """Add the `logo_data` column in existing deployments where the table already exists."""
+    inspector = inspect(engine)
+    columns = {column["name"] for column in inspector.get_columns("school_classes")}
+    if "logo_data" in columns:
+        return False
+
+    column_type = "BYTEA" if engine.dialect.name == "postgresql" else "BLOB"
+    with engine.begin() as conn:
+        conn.execute(text(f"ALTER TABLE school_classes ADD COLUMN logo_data {column_type}"))
+
+    print("Added missing logo_data column to school_classes.")
+    return True
 
 
 def calendar_day_for_working_day(working_day_num: int, start_date: date) -> date:
@@ -112,7 +137,7 @@ def detect_image_mime_type(image_data: bytes) -> str:
 
 
 def ensure_reference_data(db: Session) -> bool:
-    # Keep existing data intact; only add missing groups/classes.
+    # Keep existing data intact; only add missing groups/classes and safe logo defaults.
     changed = False
 
     groups_by_name = {g.name: g for g in db.query(ClassGroup).all()}
@@ -137,23 +162,38 @@ def ensure_reference_data(db: Session) -> bool:
             for class_name, total_students in class_dict.items():
                 class_totals[class_name] = total_students
 
-    existing_class_names = {c.name for c in db.query(SchoolClass).all()}
+    existing_classes = {c.name: c for c in db.query(SchoolClass).all()}
     default_logos = get_all_default_logos()
+
     for class_name, total_students in class_totals.items():
-        if class_name in existing_class_names:
-            continue
         group_name = class_to_group.get(class_name)
         if group_name is None:
             continue
+
         group_obj = groups_by_name.get(group_name)
         if group_obj is None:
             continue
+
+        legacy_logo_file = get_legacy_uploaded_logo_file(class_name)
+        desired_logo_data = (
+            legacy_logo_file.read_bytes()
+            if legacy_logo_file is not None
+            else default_logos.get(class_name)
+        )
+
+        existing_class = existing_classes.get(class_name)
+        if existing_class is not None:
+            if existing_class.logo_data is None and desired_logo_data is not None:
+                existing_class.logo_data = desired_logo_data
+                changed = True
+            continue
+
         db.add(
             SchoolClass(
                 name=class_name,
                 group_id=group_obj.id,
                 total_students=total_students,
-                logo_data=default_logos.get(class_name),
+                logo_data=desired_logo_data,
             )
         )
         changed = True
@@ -202,13 +242,15 @@ def bootstrap_reference_data():
     global APP_MODE
     db = SessionLocal()
     try:
+        ensure_logo_data_column_exists()
+
         # Auto-switch to campaign mode on/after Apr 13 if not explicitly set
         campaign_start = date(2026, 4, 13)
         if date.today() >= campaign_start and os.getenv("APP_MODE") is None:
             APP_MODE = "campaign"
-        
+
         if ensure_reference_data(db):
-            print("Bootstrapped missing class/group reference data.")
+            print("Bootstrapped missing class/group reference data and logo defaults.")
         if APP_MODE == "preview":
             if seed_preview_data(db):
                 print("Seeded preview simulation data.")
@@ -279,14 +321,19 @@ def upload_class_logo(class_name: str, file: UploadFile = File(...), db: Session
 
     # Read the binary file content
     file_content = file.file.read()
-    
+
     # Find the school class and update its logo_data
     school_class = db.query(SchoolClass).filter(SchoolClass.name == normalized_class_name).first()
     if not school_class:
         raise HTTPException(status_code=404, detail="Class not found in database")
-    
-    school_class.logo_data = file_content
-    db.commit()
+
+    try:
+        school_class.logo_data = file_content
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        print(f"Failed to save logo for {normalized_class_name}: {exc}")
+        raise HTTPException(status_code=500, detail="Could not save logo in database") from exc
 
     return {
         "success": True,
@@ -308,8 +355,14 @@ def reset_class_logo(class_name: str, db: Session = Depends(get_db)):
     
     # Load default logo from frontend folder
     default_logo = get_default_logo_data(normalized_class_name)
-    school_class.logo_data = default_logo
-    db.commit()
+
+    try:
+        school_class.logo_data = default_logo
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        print(f"Failed to reset logo for {normalized_class_name}: {exc}")
+        raise HTTPException(status_code=500, detail="Could not reset logo in database") from exc
 
     return {
         "success": True,
@@ -333,12 +386,16 @@ def reset_and_seed_preview(db: Session = Depends(get_db)):
 def deployment_status(db: Session = Depends(get_db)):
     survey_rows = db.query(SurveyResult).count()
     audit_rows = db.query(CellEditAudit).count()
+    custom_logo_rows = db.query(SchoolClass).filter(SchoolClass.logo_data.isnot(None)).count()
     return {
         "app_mode": APP_MODE,
         "simulation_enabled": APP_MODE == "preview",
         "campaign_db_clean": survey_rows == 0 and audit_rows == 0,
         "survey_results_rows": survey_rows,
         "cell_edit_audit_rows": audit_rows,
+        "logo_storage": "database",
+        "database_backend": "postgresql" if DATABASE_URL.startswith("postgresql://") else "sqlite",
+        "classes_with_logo_data": custom_logo_rows,
     }
 
 
