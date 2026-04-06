@@ -194,13 +194,13 @@ function EditableTablePage() {
     return '#e2e8f0';
   };
 
-  const renderTable = (weekDays, weekLabel) => (
-    <div style={{ flex: 1, minWidth: 0 }}>
+  const renderTable = (weekDays, weekLabel, showClassColumn = false) => (
+    <div style={{ flex: showClassColumn ? '0 0 auto' : 1, minWidth: 0 }}>
       <h3 style={{ marginTop: 0, color: '#111' }}>{weekLabel}</h3>
       <table style={{ width: '100%', borderCollapse: 'collapse', color: '#111' }}>
         <thead>
           <tr>
-            <th style={{ color: '#111' }}>Klasse</th>
+            {showClassColumn && <th style={{ color: '#111' }}>Klasse</th>}
             {weekDays.map(day => (
               <th key={day} style={{ background: getColumnBackground(day) }}>
                 <div style={{ color: '#111' }}>{getWeekdayForDay(day)}</div>
@@ -212,12 +212,14 @@ function EditableTablePage() {
         <tbody>
           {classes.map(cls => (
             <tr key={cls.id}>
-              <td style={{ whiteSpace: 'nowrap', color: '#111' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <ClassLogo className={cls.name} size={34} />
-                  <span>{cls.name} ({cls.total_students})</span>
-                </div>
-              </td>
+              {showClassColumn && (
+                <td style={{ whiteSpace: 'nowrap', color: '#111', paddingRight: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <ClassLogo className={cls.name} size={34} />
+                    <span>{cls.name} ({cls.total_students})</span>
+                  </div>
+                </td>
+              )}
               {weekDays.map(day => (
                 <td key={day} style={{ background: getColumnBackground(day) }}>
                   <input
@@ -295,9 +297,9 @@ function EditableTablePage() {
           {cleanStatus && <div style={{ marginTop: 6, color: '#222' }}>{cleanStatus}</div>}
         </div>
       )}
-      <div style={{ display: 'flex', gap: 20, overflow: 'auto', marginBottom: '1rem' }}>
-        {renderTable([1, 2, 3, 4, 5], 'Uke 1 (13–17 april)')}
-        {renderTable([6, 7, 8, 9, 10], 'Uke 2 (20–24 april)')}
+      <div style={{ display: 'flex', gap: 12, overflow: 'auto', marginBottom: '1rem', alignItems: 'flex-start' }}>
+        {renderTable([1, 2, 3, 4, 5], 'Uke 1 (13–17 april)', true)}
+        {renderTable([6, 7, 8, 9, 10], 'Uke 2 (20–24 april)', false)}
       </div>
       <div style={{ marginTop: '1rem', color: status.includes('feilet') ? '#b00020' : '#1b5e20' }}>{status}</div>
     </div>
