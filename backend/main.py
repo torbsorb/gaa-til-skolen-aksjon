@@ -204,6 +204,18 @@ def ensure_reference_data(db: Session) -> bool:
     return changed
 
 
+def expected_preview_dates() -> list[date]:
+    start_date = date(2026, 4, 13)
+    return [calendar_day_for_working_day(day, start_date) for day in range(1, 11)]
+
+
+def preview_data_needs_refresh(db: Session) -> bool:
+    existing_dates = [row[0] for row in db.query(SurveyResult.date).distinct().order_by(SurveyResult.date).all()]
+    if not existing_dates:
+        return False
+    return existing_dates != expected_preview_dates()
+
+
 def seed_preview_data(db: Session, force: bool = False) -> bool:
     """Populate 10 working days of realistic fake survey data for preview/demo mode."""
     if not force and db.query(SurveyResult).count() > 0:
@@ -252,7 +264,13 @@ def bootstrap_reference_data():
         if ensure_reference_data(db):
             print("Bootstrapped missing class/group reference data and logo defaults.")
         if APP_MODE == "preview":
-            if seed_preview_data(db):
+            if preview_data_needs_refresh(db):
+                db.query(CellEditAudit).delete()
+                db.query(SurveyResult).delete()
+                db.commit()
+                seed_preview_data(db, force=True)
+                print("Refreshed preview simulation data to the April weekday schedule.")
+            elif seed_preview_data(db):
                 print("Seeded preview simulation data.")
     finally:
         db.close()

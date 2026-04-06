@@ -15,14 +15,45 @@ function EditableTablePage() {
   const [simulationEnabled, setSimulationEnabled] = useState(true);
   const days = Array.from({ length: 10 }, (_, i) => i + 1);
   const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const campaignStartDate = new Date('2026-04-13T12:00:00');
+
+  const getWorkingDateForDay = (day) => {
+    const workingDate = new Date(campaignStartDate);
+    let remainingDays = day - 1;
+
+    while (remainingDays > 0) {
+      workingDate.setDate(workingDate.getDate() + 1);
+      if (workingDate.getDay() !== 0 && workingDate.getDay() !== 6) {
+        remainingDays -= 1;
+      }
+    }
+
+    return workingDate;
+  };
+
+  const formatDisplayDate = (dateValue) => (
+    dateValue.toLocaleDateString('sv-SE')
+  );
 
   const getLiveCompetitionDay = () => {
-    if (!baseDate) return 1;
-    const start = new Date(`${baseDate}T00:00:00`);
     const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
-    return Math.max(1, Math.min(10, diffDays));
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
+
+    if (today < campaignStartDate) {
+      return 1;
+    }
+
+    let workingDay = 0;
+    const cursor = new Date(campaignStartDate);
+
+    while (cursor <= today && workingDay < 10) {
+      if (cursor.getDay() !== 0 && cursor.getDay() !== 6) {
+        workingDay += 1;
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    return Math.max(1, Math.min(10, workingDay));
   };
 
   const currentCompetitionDay = simulationEnabled ? simulatedDay : getLiveCompetitionDay();
@@ -148,19 +179,12 @@ function EditableTablePage() {
     }
   };
 
-  // Helper to get date string for each column
-  const getDateForDay = (day) => {
-    if (!baseDate) return `Dag ${day}`;
-    const d = new Date(baseDate);
-    d.setDate(d.getDate() + (day - 1));
-    return d.toISOString().split('T')[0];
-  };
+  // Helper to get the real campaign date for each working day column
+  const getDateForDay = (day) => formatDisplayDate(getWorkingDateForDay(day));
 
   const getWeekdayForDay = (day) => {
-    if (!baseDate) return `Dag ${day}`;
-    const d = new Date(baseDate);
-    d.setDate(d.getDate() + (day - 1));
-    const weekday = d.toLocaleDateString('nb-NO', { weekday: 'long' });
+    const dateForDay = getWorkingDateForDay(day);
+    const weekday = dateForDay.toLocaleDateString('nb-NO', { weekday: 'long' });
     return weekday.charAt(0).toUpperCase() + weekday.slice(1);
   };
 
