@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Gå til skolen ikon">
+  <rect width="64" height="64" rx="14" fill="#EAF4FF"/>
+  <path d="M8 50h48" stroke="#8B5E3C" stroke-width="3" stroke-linecap="round"/>
+  <path d="M11 50l8-12 8 12" fill="#7CC576"/>
+  <path d="M21 50l9-15 10 15" fill="#67B86A"/>
+  <path d="M35 50l7-10 7 10" fill="#7CC576"/>
+  <path d="M42 28l-14-8-14 8" fill="#FFCC66" stroke="#D39A37" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="18" y="28" width="20" height="15" rx="2" fill="#FFF8E8" stroke="#D39A37" stroke-width="2"/>
+  <rect x="25" y="34" width="5" height="9" fill="#8B5E3C"/>
+  <rect x="20" y="32" width="4" height="4" fill="#9FD3FF"/>
+  <rect x="31" y="32" width="4" height="4" fill="#9FD3FF"/>
+  <circle cx="48" cy="18" r="5" fill="#FFD54F"/>
+  <circle cx="47" cy="17" r="1.2" fill="#FFB300"/>
+  <path d="M47 27c3 0 5-2 5-5" stroke="#1E88E5" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="47" cy="31" r="3.2" fill="#1E88E5"/>
+  <path d="M46 34l-5 6" stroke="#1E88E5" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M48 34l4 4" stroke="#1E88E5" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M45 29l-4-2" stroke="#1E88E5" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M49 29l4-3" stroke="#1E88E5" stroke-width="2.4" stroke-linecap="round"/>
+</svg>
