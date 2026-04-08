@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Lærerportal ikon">
+  <rect width="64" height="64" rx="14" fill="#EEF3FF"/>
+  <rect x="10" y="12" width="30" height="22" rx="4" fill="#2F5FB3"/>
+  <rect x="13" y="15" width="24" height="16" rx="2" fill="#CFE3FF"/>
+  <path d="M18 23h14" stroke="#2F5FB3" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M18 27h9" stroke="#2F5FB3" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M22 34v8" stroke="#7B5A3E" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M28 34v8" stroke="#7B5A3E" stroke-width="3.2" stroke-linecap="round"/>
+  <circle cx="46" cy="39" r="11" fill="#FFC857"/>
+  <circle cx="46" cy="39" r="6" fill="none" stroke="#7C4D00" stroke-width="3"/>
+  <path d="M46 24v5" stroke="#7C4D00" stroke-width="3" stroke-linecap="round"/>
+  <path d="M46 49v5" stroke="#7C4D00" stroke-width="3" stroke-linecap="round"/>
+  <path d="M31 39h5" stroke="#7C4D00" stroke-width="3" stroke-linecap="round"/>
+  <path d="M56 39h5" stroke="#7C4D00" stroke-width="3" stroke-linecap="round"/>
+  <path d="M35.5 28.5l3.5 3.5" stroke="#7C4D00" stroke-width="3" stroke-linecap="round"/>
+  <path d="M53 46l3.5 3.5" stroke="#7C4D00" stroke-width="3" stroke-linecap="round"/>
+  <path d="M35.5 49.5l3.5-3.5" stroke="#7C4D00" stroke-width="3" stroke-linecap="round"/>
+  <path d="M53 32l3.5-3.5" stroke="#7C4D00" stroke-width="3" stroke-linecap="round"/>
+</svg>

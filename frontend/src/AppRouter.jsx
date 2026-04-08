@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import SurveyPage from './SurveyPage';
 import ResultsPage from './ResultsPage';
@@ -8,9 +9,38 @@ import ClassLogoManagerPage from './ClassLogoManagerPage';
 
 const TEACHER_PORTAL_PATH = '/secretTeacherPortal273892';
 
+function RouteChromeManager() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const isTeacherPortal = location.pathname.startsWith(TEACHER_PORTAL_PATH);
+    const title = isTeacherPortal
+      ? 'Lærerportal | Gå til skolen-aksjon'
+      : 'Gå til skolen-aksjon';
+    const faviconHref = isTeacherPortal
+      ? '/teacher-portal-favicon.svg'
+      : '/walk-to-school-favicon.svg';
+
+    document.title = title;
+
+    let favicon = document.querySelector("link[rel='icon']");
+    if (!favicon) {
+      favicon = document.createElement('link');
+      favicon.setAttribute('rel', 'icon');
+      document.head.appendChild(favicon);
+    }
+
+    favicon.setAttribute('type', 'image/svg+xml');
+    favicon.setAttribute('href', faviconHref);
+  }, [location.pathname]);
+
+  return null;
+}
+
 function AppRouter() {
   return (
     <BrowserRouter>
+      <RouteChromeManager />
       <Routes>
         <Route path="/" element={<ResultsPage />} />
         <Route path="/results" element={<ResultsPage />} />
