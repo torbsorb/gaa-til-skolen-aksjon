@@ -18,8 +18,8 @@ function RouteChromeManager() {
       ? 'Lærerportal | Gå til skolen-aksjon'
       : 'Gå til skolen-aksjon';
     const faviconHref = isTeacherPortal
-      ? '/teacher-portal-favicon.svg'
-      : '/walk-to-school-favicon.svg';
+      ? '/teacher-portal-favicon.svg?v=2'
+      : '/walk-to-school-favicon.svg?v=1';
 
     document.title = title;
 
