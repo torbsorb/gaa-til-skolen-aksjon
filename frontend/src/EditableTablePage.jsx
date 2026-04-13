@@ -194,13 +194,16 @@ function EditableTablePage() {
     return '#e2e8f0';
   };
 
+  // Same height for all data rows so uke 2 (without klasse-kolonne) matches uke 1 with logo.
+  const DATA_ROW_HEIGHT_PX = 48;
+
   const renderTable = (weekDays, weekLabel, showClassColumn = false) => (
     <div style={{ flex: showClassColumn ? '0 0 auto' : 1, minWidth: 0 }}>
       <h3 style={{ marginTop: 0, color: '#111' }}>{weekLabel}</h3>
       <table style={{ width: '100%', borderCollapse: 'collapse', color: '#111' }}>
         <thead>
           <tr>
-            {showClassColumn && <th style={{ color: '#111' }}>Klasse</th>}
+            {showClassColumn && <th style={{ color: '#111', verticalAlign: 'bottom' }}>Klasse</th>}
             {weekDays.map(day => (
               <th key={day} style={{ background: getColumnBackground(day) }}>
                 <div style={{ color: '#111' }}>{getWeekdayForDay(day)}</div>
@@ -211,17 +214,24 @@ function EditableTablePage() {
         </thead>
         <tbody>
           {classes.map(cls => (
-            <tr key={cls.id}>
+            <tr key={cls.id} style={{ height: DATA_ROW_HEIGHT_PX }}>
               {showClassColumn && (
-                <td style={{ whiteSpace: 'nowrap', color: '#111', paddingRight: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <td style={{ whiteSpace: 'nowrap', color: '#111', paddingRight: 12, verticalAlign: 'middle' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 34 }}>
                     <ClassLogo className={cls.name} size={34} />
                     <span>{cls.name} ({cls.total_students})</span>
                   </div>
                 </td>
               )}
               {weekDays.map(day => (
-                <td key={day} style={{ background: getColumnBackground(day) }}>
+                <td
+                  key={day}
+                  style={{
+                    background: getColumnBackground(day),
+                    verticalAlign: 'middle',
+                    padding: '6px 4px',
+                  }}
+                >
                   <input
                     type="text"
                     inputMode="numeric"
@@ -230,11 +240,13 @@ function EditableTablePage() {
                     onChange={e => handleChange(cls.id, day, e.target.value, cls.total_students)}
                     style={{
                       width: 60,
+                      minHeight: 34,
+                      boxSizing: 'border-box',
                       background: day > currentCompetitionDay ? '#cbd5e1' : getCellBackground(cls.id, day),
                       color: '#111',
                       border: '1px solid #bbb',
                       opacity: day > currentCompetitionDay ? 0.75 : 1,
-                      cursor: day > currentCompetitionDay ? 'not-allowed' : 'text'
+                      cursor: day > currentCompetitionDay ? 'not-allowed' : 'text',
                     }}
                   />
                 </td>
