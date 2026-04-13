@@ -183,6 +183,9 @@ def ensure_reference_data(db: Session) -> bool:
 
         existing_class = existing_classes.get(class_name)
         if existing_class is not None:
+            if existing_class.total_students != total_students:
+                existing_class.total_students = total_students
+                changed = True
             if existing_class.logo_data is None and desired_logo_data is not None:
                 existing_class.logo_data = desired_logo_data
                 changed = True
