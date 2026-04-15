@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import API_BASE from './apiBase';
 import ClassLogo from './ClassLogo';
+import { getChartSeriesStyle } from './chartSeriesColors';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,6 +16,9 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
+function scoresNearlyEqual(a, b) {
+  return Math.abs(a - b) < 1e-4;
+}
 
 function ResultsPage() {
   const [leaders, setLeaders] = useState([]);
@@ -165,7 +169,18 @@ function ResultsPage() {
   const groupEntries = currentGroup
     ? [...(simulatedGroupedLeaders[currentGroup] || [])].sort((a, b) => b.percent_walked - a.percent_walked)
     : [];
-  const podiumOrder = [1, 0, 2];
+
+  const scoreTiers = [];
+  groupEntries.forEach((entry) => {
+    const last = scoreTiers[scoreTiers.length - 1];
+    if (last && scoresNearlyEqual(last.score, entry.percent_walked)) {
+      last.entries.push(entry);
+    } else {
+      scoreTiers.push({ score: entry.percent_walked, entries: [entry] });
+    }
+  });
+  const podiumSlices = scoreTiers.slice(0, 3);
+
   const podiumTiers = [
     {
       rank: 1,
@@ -193,12 +208,13 @@ function ResultsPage() {
     },
   ];
 
-  // Filter classes in the current group
-  const groupClassIds = groupEntries.map((entry) => entry.class_id);
-  const groupClasses = safeClasses.filter(cls => groupClassIds.includes(cls.id));
+  // Same order as tabell/podium (sorted standings), not DB class list order
+  const groupClassesOrdered = groupEntries
+    .map((e) => classById[e.class_id])
+    .filter(Boolean);
 
   // Build datasets for each class in the group
-  const datasets = groupClasses.map(cls => {
+  const datasets = groupClassesOrdered.map((cls, seriesIndex) => {
     const totalStudents = Number(cls.total_students || 0);
     let cumSum = 0;
     const data = days.map(day => {
@@ -208,12 +224,12 @@ function ResultsPage() {
       const denominator = totalStudents * day;
       return denominator ? (cumSum / denominator) * 100 : 0;
     });
+    const colors = getChartSeriesStyle(seriesIndex);
     return {
       label: cls.name,
       data,
       fill: false,
-      borderColor: `hsl(${(cls.id * 47) % 360}, 70%, 50%)`,
-      backgroundColor: `hsl(${(cls.id * 47) % 360}, 70%, 70%)`,
+      ...colors,
       tension: 0.2
     };
   });
@@ -296,26 +312,127 @@ function ResultsPage() {
                 <div style={{ flex: isWideLayout ? '0 0 300px' : '1 1 auto' }}>
                   <div style={{ marginBottom: 16, padding: '18px 10px 10px', borderRadius: 16, background: 'linear-gradient(180deg, #f4f0e7 0%, #efe9de 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7), 0 6px 16px rgba(0,0,0,0.08)' }}>
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 2, width: '100%', minHeight: 154 }}>
-                      {podiumOrder.map((entryIndex) => {
-                        const entry = groupEntries[entryIndex];
-                        const tier = podiumTiers[entryIndex];
-                        if (!entry) {
-                          return <div key={tier.rank} style={{ width: tier.width, height: tier.height + 52 }} />;
+                      {[
+                        { sliceIndex: 1, tier: podiumTiers[1] },
+                        { sliceIndex: 0, tier: podiumTiers[0] },
+                        { sliceIndex: 2, tier: podiumTiers[2] },
+                      ].map(({ sliceIndex, tier }) => {
+                        const slice = podiumSlices[sliceIndex];
+                        const entries = slice?.entries || [];
+                        const colWidth = Math.max(tier.width, Math.min(entries.length, 3) * 92 + (entries.length > 1 ? 16 : 0));
+
+                        if (entries.length === 0) {
+                          return (
+                            <div key={`empty-${tier.rank}`} style={{ width: tier.width, height: tier.height + 52 }} />
+                          );
                         }
 
                         return (
-                          <div key={tier.rank} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', width: tier.width }}>
-                            <div style={{ marginBottom: 18, minHeight: 62, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: 6, textAlign: 'center' }}>
-                              <div style={{ padding: '6px 10px', fontWeight: 800, fontSize: 16, lineHeight: 1.05, color: '#222', background: 'rgba(255,255,255,0.9)', borderRadius: 10, boxShadow: '0 2px 6px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                                <ClassLogo className={entry.class_name} size={38} />
-                                <span>{entry.class_name}</span>
+                          <div
+                            key={`tier-${tier.rank}-${slice.score}`}
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'flex-end',
+                              width: colWidth,
+                              maxWidth: '100%',
+                            }}
+                          >
+                            <div
+                              style={{
+                                marginBottom: 18,
+                                minHeight: 62,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'flex-end',
+                                gap: 6,
+                                textAlign: 'center',
+                                width: '100%',
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'row',
+                                  flexWrap: 'wrap',
+                                  justifyContent: 'center',
+                                  alignItems: 'flex-end',
+                                  gap: 8,
+                                  width: '100%',
+                                }}
+                              >
+                                {entries.map((entry) => (
+                                  <div
+                                    key={entry.class_id}
+                                    style={{
+                                      padding: '6px 10px',
+                                      fontWeight: 800,
+                                      fontSize: 15,
+                                      lineHeight: 1.05,
+                                      color: '#222',
+                                      background: 'rgba(255,255,255,0.9)',
+                                      borderRadius: 10,
+                                      boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      alignItems: 'center',
+                                      gap: 6,
+                                      minWidth: 0,
+                                      flex: entries.length > 1 ? '1 1 88px' : '0 0 auto',
+                                    }}
+                                  >
+                                    <ClassLogo className={entry.class_name} size={entries.length > 2 ? 32 : 38} />
+                                    <span>{entry.class_name}</span>
+                                  </div>
+                                ))}
                               </div>
-                              <div style={{ fontWeight: 800, fontSize: 13, color: '#202020' }}>{entry.percent_walked.toFixed(1)}%</div>
+                              <div style={{ fontWeight: 800, fontSize: 13, color: '#202020' }}>
+                                {entries[0].percent_walked.toFixed(1)}%
+                              </div>
                             </div>
-                            <div style={{ position: 'relative', width: tier.width, height: tier.height, background: 'linear-gradient(135deg, #f6f6f6 0%, #ffffff 38%, #eeeeee 39%, #fbfbfb 100%)', border: '1px solid #d9d9d9', borderBottomColor: '#c7c7c7', boxShadow: '0 8px 14px rgba(0,0,0,0.08)' }}>
-                              <div style={{ position: 'absolute', top: -12, left: 8, right: 8, height: 18, background: tier.accentColor, transform: 'skewX(-24deg)' }} />
-                              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(120deg, transparent 0%, transparent 38%, rgba(255,255,255,0.5) 39%, transparent 56%)' }} />
-                              <div style={{ position: 'absolute', left: '50%', bottom: tier.rank === 3 ? 10 : 13, transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div
+                              style={{
+                                position: 'relative',
+                                width: '100%',
+                                maxWidth: colWidth,
+                                height: tier.height,
+                                background: 'linear-gradient(135deg, #f6f6f6 0%, #ffffff 38%, #eeeeee 39%, #fbfbfb 100%)',
+                                border: '1px solid #d9d9d9',
+                                borderBottomColor: '#c7c7c7',
+                                boxShadow: '0 8px 14px rgba(0,0,0,0.08)',
+                              }}
+                            >
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  top: -12,
+                                  left: 8,
+                                  right: 8,
+                                  height: 18,
+                                  background: tier.accentColor,
+                                  transform: 'skewX(-24deg)',
+                                }}
+                              />
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  inset: 0,
+                                  background: 'linear-gradient(120deg, transparent 0%, transparent 38%, rgba(255,255,255,0.5) 39%, transparent 56%)',
+                                }}
+                              />
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  left: '50%',
+                                  bottom: tier.rank === 3 ? 10 : 13,
+                                  transform: 'translateX(-50%)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
                                 <div style={{ fontSize: tier.rank === 1 ? 32 : 28, lineHeight: 1 }}>{tier.medal}</div>
                               </div>
                             </div>
