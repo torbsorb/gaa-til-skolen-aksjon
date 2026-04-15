@@ -319,7 +319,12 @@ function ResultsPage() {
                       ].map(({ sliceIndex, tier }) => {
                         const slice = podiumSlices[sliceIndex];
                         const entries = slice?.entries || [];
-                        const colWidth = Math.max(tier.width, Math.min(entries.length, 3) * 92 + (entries.length > 1 ? 16 : 0));
+                        const cardGap = 8;
+                        const cardMin = 88;
+                        const colWidth = Math.max(
+                          tier.width,
+                          entries.length * cardMin + Math.max(0, entries.length - 1) * cardGap
+                        );
 
                         if (entries.length === 0) {
                           return (
@@ -356,10 +361,10 @@ function ResultsPage() {
                                 style={{
                                   display: 'flex',
                                   flexDirection: 'row',
-                                  flexWrap: 'wrap',
+                                  flexWrap: entries.length > 3 ? 'wrap' : 'nowrap',
                                   justifyContent: 'center',
                                   alignItems: 'flex-end',
-                                  gap: 8,
+                                  gap: cardGap,
                                   width: '100%',
                                 }}
                               >
@@ -379,8 +384,7 @@ function ResultsPage() {
                                       flexDirection: 'column',
                                       alignItems: 'center',
                                       gap: 6,
-                                      minWidth: 0,
-                                      flex: entries.length > 1 ? '1 1 88px' : '0 0 auto',
+                                      flex: '0 0 auto',
                                     }}
                                   >
                                     <ClassLogo className={entry.class_name} size={entries.length > 2 ? 32 : 38} />
