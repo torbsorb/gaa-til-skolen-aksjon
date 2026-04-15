@@ -1,5 +1,6 @@
 # Python
 __pycache__/
+backend/.venv/
 *.py[cod]
 
 # Local backend env
