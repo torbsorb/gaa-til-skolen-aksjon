@@ -16,6 +16,10 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
+/** Daglig andel × 10 poeng, akkumulert; maks 100 etter 10 dager. */
+const POINTS_PER_COMPETITION_DAY = 10;
+const MAX_CUMULATIVE_POINTS = 100;
+
 function scoresNearlyEqual(a, b) {
   return Math.abs(a - b) < 1e-4;
 }
@@ -239,6 +243,31 @@ function ResultsPage() {
     datasets
   };
 
+  const datasetsPoints = groupClassesOrdered.map((cls, seriesIndex) => {
+    const totalStudents = Number(cls.total_students || 0);
+    let cumulativePoints = 0;
+    const data = days.map((day) => {
+      if (day > effectiveDay) return null;
+      const walkedToday = Number(tableData[cls.id]?.[day] || 0);
+      const share = totalStudents > 0 ? walkedToday / totalStudents : 0;
+      cumulativePoints += share * POINTS_PER_COMPETITION_DAY;
+      return cumulativePoints;
+    });
+    const colors = getChartSeriesStyle(seriesIndex);
+    return {
+      label: cls.name,
+      data,
+      fill: false,
+      ...colors,
+      tension: 0.2
+    };
+  });
+
+  const chartDataPoints = {
+    labels: days.map(getDateForDay),
+    datasets: datasetsPoints
+  };
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -253,6 +282,36 @@ function ResultsPage() {
         ticks: {
           callback: (value) => `${value}%`
         }
+      },
+      x: { title: { display: true, text: 'Dato' } }
+    }
+  };
+
+  const pointsChartTitleLines = [
+    `Normaliserte poeng – ${currentGroup || ''} (Dag ${effectiveDay})`,
+    'Inntil 10 poeng per dag · maks 100 totalt over 10 dager',
+  ];
+
+  const chartOptionsPoints = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' },
+      title: {
+        display: true,
+        text: pointsChartTitleLines,
+        padding: { bottom: 4 },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: MAX_CUMULATIVE_POINTS,
+        title: { display: true, text: 'Kumulativ poeng' },
+        ticks: {
+          stepSize: 10,
+          callback: (value) => `${value}`,
+        },
       },
       x: { title: { display: true, text: 'Dato' } }
     }
@@ -300,9 +359,30 @@ function ResultsPage() {
           return (
             <div>
               <div style={{ display: 'flex', gap: 16, alignItems: 'stretch', justifyContent: 'center', flexDirection: isWideLayout ? 'row' : 'column', marginBottom: 16 }}>
-                <div style={{ flex: '1 1 0', minWidth: 0, background: '#f9f9ff', borderRadius: 8, padding: 12, height: isWideLayout ? 320 : '52vh', maxHeight: 560, color: '#111' }}>
+                <div
+                  style={{
+                    flex: '1 1 0',
+                    minWidth: 0,
+                    background: '#f9f9ff',
+                    borderRadius: 8,
+                    padding: 12,
+                    height: isWideLayout ? 560 : '62vh',
+                    maxHeight: 800,
+                    color: '#111',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12,
+                  }}
+                >
                   {datasets.length > 0 ? (
-                    <Line data={chartData} options={chartOptions} />
+                    <>
+                      <div style={{ flex: '1 1 0', minHeight: 0, position: 'relative' }}>
+                        <Line data={chartData} options={chartOptions} />
+                      </div>
+                      <div style={{ flex: '1 1 0', minHeight: 0, position: 'relative' }}>
+                        <Line data={chartDataPoints} options={chartOptionsPoints} />
+                      </div>
+                    </>
                   ) : (
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#666' }}>
                       Ingen grafdata tilgjengelig ennå.
