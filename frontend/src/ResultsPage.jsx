@@ -268,23 +268,46 @@ function ResultsPage() {
     datasets: datasetsPoints
   };
 
+  const compactChart = !isWideLayout;
+  const chartTitleFontSize = compactChart ? 11 : 14;
+  const chartLegendFontSize = compactChart ? 9 : 12;
+  const chartTickFontSize = compactChart ? 9 : 11;
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'top' },
-      title: { display: true, text: `Kumulativ andel som gikk - ${currentGroup || ''} (Dag ${effectiveDay})` }
+      legend: {
+        position: 'top',
+        labels: {
+          font: { size: chartLegendFontSize },
+          boxWidth: compactChart ? 10 : 40,
+        },
+      },
+      title: {
+        display: true,
+        text: `Kumulativ andel som gikk - ${currentGroup || ''} (Dag ${effectiveDay})`,
+        font: { size: chartTitleFontSize },
+        padding: { bottom: compactChart ? 2 : 6 },
+      },
     },
     scales: {
       y: {
         beginAtZero: true,
-        title: { display: true, text: 'Kumulativ andel (%)' },
+        title: { display: true, text: 'Kumulativ andel (%)', font: { size: chartTickFontSize } },
         ticks: {
-          callback: (value) => `${value}%`
-        }
+          font: { size: chartTickFontSize },
+          callback: (value) => `${value}%`,
+        },
       },
-      x: { title: { display: true, text: 'Dato' } }
-    }
+      x: {
+        title: { display: true, text: 'Dato', font: { size: chartTickFontSize } },
+        ticks: {
+          font: { size: chartTickFontSize },
+          maxRotation: compactChart ? 45 : 0,
+        },
+      },
+    },
   };
 
   const pointsChartTitleLines = [
@@ -296,25 +319,39 @@ function ResultsPage() {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'top' },
+      legend: {
+        position: 'top',
+        labels: {
+          font: { size: chartLegendFontSize },
+          boxWidth: compactChart ? 10 : 40,
+        },
+      },
       title: {
         display: true,
         text: pointsChartTitleLines,
-        padding: { bottom: 4 },
+        font: { size: chartTitleFontSize },
+        padding: { bottom: compactChart ? 2 : 4 },
       },
     },
     scales: {
       y: {
         beginAtZero: true,
         max: MAX_CUMULATIVE_POINTS,
-        title: { display: true, text: 'Kumulativ poeng' },
+        title: { display: true, text: 'Kumulativ poeng', font: { size: chartTickFontSize } },
         ticks: {
           stepSize: 10,
+          font: { size: chartTickFontSize },
           callback: (value) => `${value}`,
         },
       },
-      x: { title: { display: true, text: 'Dato' } }
-    }
+      x: {
+        title: { display: true, text: 'Dato', font: { size: chartTickFontSize } },
+        ticks: {
+          font: { size: chartTickFontSize },
+          maxRotation: compactChart ? 45 : 0,
+        },
+      },
+    },
   };
 
   return (
@@ -361,25 +398,51 @@ function ResultsPage() {
               <div style={{ display: 'flex', gap: 16, alignItems: 'stretch', justifyContent: 'center', flexDirection: isWideLayout ? 'row' : 'column', marginBottom: 16 }}>
                 <div
                   style={{
-                    flex: '1 1 0',
+                    flex: isWideLayout ? '1 1 0' : '1 1 auto',
                     minWidth: 0,
+                    width: '100%',
                     background: '#f9f9ff',
                     borderRadius: 8,
                     padding: 12,
-                    height: isWideLayout ? 560 : '62vh',
-                    maxHeight: 800,
+                    ...(isWideLayout
+                      ? { height: 560, maxHeight: 800 }
+                      : { height: 'auto' }),
                     color: '#111',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 12,
+                    gap: isWideLayout ? 12 : 16,
                   }}
                 >
                   {datasets.length > 0 ? (
                     <>
-                      <div style={{ flex: '1 1 0', minHeight: 0, position: 'relative' }}>
+                      <div
+                        style={
+                          isWideLayout
+                            ? { flex: '1 1 0', minHeight: 0, position: 'relative' }
+                            : {
+                                position: 'relative',
+                                flex: '0 0 auto',
+                                width: '100%',
+                                height: 240,
+                                minHeight: 240,
+                              }
+                        }
+                      >
                         <Line data={chartData} options={chartOptions} />
                       </div>
-                      <div style={{ flex: '1 1 0', minHeight: 0, position: 'relative' }}>
+                      <div
+                        style={
+                          isWideLayout
+                            ? { flex: '1 1 0', minHeight: 0, position: 'relative' }
+                            : {
+                                position: 'relative',
+                                flex: '0 0 auto',
+                                width: '100%',
+                                height: 260,
+                                minHeight: 260,
+                              }
+                        }
+                      >
                         <Line data={chartDataPoints} options={chartOptionsPoints} />
                       </div>
                     </>
