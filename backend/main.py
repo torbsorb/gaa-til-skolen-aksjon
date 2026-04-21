@@ -599,8 +599,19 @@ def upsert_survey(
 @app.post("/admin/mark-clean")
 def mark_clean(request: Request, db: Session = Depends(get_db)):
     client_host = request.client.host if request.client else ""
-    if client_host not in {"127.0.0.1", "::1", "localhost"}:
-        raise HTTPException(status_code=403, detail="Only localhost can mark database clean")
+    trusted_localhost = client_host in {"127.0.0.1", "::1", "localhost"}
+    forwarded_for = request.headers.get("x-forwarded-for")
+    provided_token = request.headers.get("x-admin-token", "").strip()
+    configured_token = os.getenv("ADMIN_MARK_CLEAN_TOKEN", "").strip()
+
+    # Remote requests behind a proxy must provide a secret token.
+    # This blocks spoofing localhost via X-Forwarded-For.
+    token_is_valid = bool(configured_token) and provided_token == configured_token
+    if not (token_is_valid or (trusted_localhost and not forwarded_for)):
+        raise HTTPException(
+            status_code=403,
+            detail="Only direct localhost or a valid admin token can mark database clean",
+        )
 
     db.query(CellEditAudit).delete()
     db.commit()
