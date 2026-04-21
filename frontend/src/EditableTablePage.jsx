@@ -4,6 +4,7 @@ import ClassLogo from './ClassLogo';
 
 
 function EditableTablePage() {
+  const ADMIN_MARK_CLEAN_TOKEN = 'replace-me-with-strong-secret';
   const [classes, setClasses] = useState([]);
   const [tableData, setTableData] = useState({}); // { class_id: { day: walked_count } }
   const [editCounts, setEditCounts] = useState({}); // { class_id: { day: edit_count } }
@@ -14,7 +15,6 @@ function EditableTablePage() {
   const [simulatedDay, setSimulatedDay] = useState(5);
   const [simulationEnabled, setSimulationEnabled] = useState(true);
   const days = Array.from({ length: 10 }, (_, i) => i + 1);
-  const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   const campaignStartDate = new Date('2026-04-13T12:00:00');
 
   const getWorkingDateForDay = (day) => {
@@ -170,12 +170,17 @@ function EditableTablePage() {
   const handleMarkClean = async () => {
     setCleanStatus('Markerer som ren...');
     try {
-      const res = await fetch(`${API_BASE}/admin/mark-clean`, { method: 'POST' });
-      if (!res.ok) throw new Error('Kun localhost');
+      const res = await fetch(`${API_BASE}/admin/mark-clean`, {
+        method: 'POST',
+        headers: {
+          'x-admin-token': ADMIN_MARK_CLEAN_TOKEN,
+        },
+      });
+      if (!res.ok) throw new Error('Mangler tilgang');
       setEditCounts({});
-      setCleanStatus('Databasen er markert som ren.');
+      setCleanStatus('Redigeringsmarkeringene er nullstilt.');
     } catch {
-      setCleanStatus('Kun tilgjengelig fra localhost på vertsmaskin.');
+      setCleanStatus('Kunne ikke nullstille. Sjekk admin-token.');
     }
   };
 
@@ -303,12 +308,10 @@ function EditableTablePage() {
           {reseedStatus && <span style={{ marginLeft: 12, color: reseedStatus.includes('eilet') ? '#b00020' : '#1b5e20' }}>{reseedStatus}</span>}
         </div>
       )}
-      {isLocalHost && (
-        <div style={{ marginBottom: 10 }}>
-          <button onClick={handleMarkClean}>Marker database clean (localhost)</button>
-          {cleanStatus && <div style={{ marginTop: 6, color: '#222' }}>{cleanStatus}</div>}
-        </div>
-      )}
+      <div style={{ marginBottom: 10 }}>
+        <button onClick={handleMarkClean}>Godkjenn nåværende redigeringer (nullstill markering)</button>
+        {cleanStatus && <div style={{ marginTop: 6, color: '#222' }}>{cleanStatus}</div>}
+      </div>
       <div style={{ display: 'flex', gap: 12, overflow: 'auto', marginBottom: '1rem', alignItems: 'flex-start' }}>
         {renderTable([1, 2, 3, 4, 5], 'Uke 1 (13–17 april)', true)}
         {renderTable([6, 7, 8, 9, 10], 'Uke 2 (20–24 april)', false)}
