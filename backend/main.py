@@ -17,6 +17,10 @@ APP_MODE = os.getenv("APP_MODE", "preview").strip().lower()
 if APP_MODE not in {"preview", "campaign"}:
     APP_MODE = "preview"
 
+# One-off obfuscated reset path token segment for campaign-end operations.
+# Intentionally not linked in UI; use only via operator runbook.
+OBFUSCATED_MARK_CLEAN_PATH = "ops/mark-clean-9d13f4b7"
+
 BASE_DIR = Path(__file__).resolve().parent
 LEGACY_LOGO_UPLOAD_DIR = BASE_DIR / "uploads" / "class-logos"
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}
@@ -605,3 +609,10 @@ def mark_clean(request: Request, db: Session = Depends(get_db)):
     db.query(CellEditAudit).delete()
     db.commit()
     return {"success": True}
+
+
+@app.post(f"/{OBFUSCATED_MARK_CLEAN_PATH}")
+def mark_clean_obfuscated(db: Session = Depends(get_db)):
+    db.query(CellEditAudit).delete()
+    db.commit()
+    return {"success": True, "source": "obfuscated-endpoint"}
