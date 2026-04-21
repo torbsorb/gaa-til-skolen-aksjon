@@ -8,13 +8,13 @@ When to use:
 - Admin says current table edits are accepted and wants edit markers reset.
 
 Endpoint:
-- `POST /admin/ops/mark-clean-2026-e2d9a7c4`
+- `POST /ops/mark-clean-9d13f4b7`
 
 Production command:
-- `curl -sS -X POST https://gaa-til-skolen-aksjon.onrender.com/admin/ops/mark-clean-2026-e2d9a7c4`
+- `curl -sS -X POST https://gaa-til-skolen-aksjon.onrender.com/ops/mark-clean-9d13f4b7`
 
 Expected response:
-- `{"success":true,"cleared_rows":<number>}`
+- `{"success":true,"source":"obfuscated-endpoint"}`
 
 Optional verification:
 1. `curl -sS https://gaa-til-skolen-aksjon.onrender.com/admin/deployment-status`
