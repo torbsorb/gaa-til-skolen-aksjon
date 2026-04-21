@@ -605,3 +605,10 @@ def mark_clean(request: Request, db: Session = Depends(get_db)):
     db.query(CellEditAudit).delete()
     db.commit()
     return {"success": True}
+
+
+@app.post("/admin/reset-edit-counts")
+def reset_edit_counts(db: Session = Depends(get_db)):
+    cleared_rows = db.query(CellEditAudit).delete()
+    db.commit()
+    return {"success": True, "cleared_rows": cleared_rows}
