@@ -37,13 +37,43 @@ function ResultsPage() {
   const [simulationEnabled, setSimulationEnabled] = useState(true);
   const days = Array.from({ length: 10 }, (_, i) => i + 1);
 
+  const getWorkingDateForDay = (day) => {
+    if (!baseDate) return null;
+    const workingDate = new Date(`${baseDate}T12:00:00`);
+    let remainingDays = day - 1;
+
+    while (remainingDays > 0) {
+      workingDate.setDate(workingDate.getDate() + 1);
+      const weekday = workingDate.getDay();
+      if (weekday !== 0 && weekday !== 6) {
+        remainingDays -= 1;
+      }
+    }
+
+    return workingDate;
+  };
+
   const getLiveCompetitionDay = () => {
     if (!baseDate) return 1;
-    const start = new Date(`${baseDate}T00:00:00`);
+    const start = new Date(`${baseDate}T12:00:00`);
     const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
-    return Math.max(1, Math.min(10, diffDays));
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
+
+    if (today < start) {
+      return 1;
+    }
+
+    let workingDay = 0;
+    const cursor = new Date(start);
+    while (cursor <= today && workingDay < 10) {
+      const weekday = cursor.getDay();
+      if (weekday !== 0 && weekday !== 6) {
+        workingDay += 1;
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    return Math.max(1, Math.min(10, workingDay));
   };
 
   const effectiveDay = simulationEnabled ? simulatedDay : getLiveCompetitionDay();
@@ -133,8 +163,8 @@ function ResultsPage() {
   // Prepare cumulative graph data for the current group
   const getDateForDay = (day) => {
     if (!baseDate) return `Dag ${day}`;
-    const d = new Date(baseDate);
-    d.setDate(d.getDate() + (day - 1));
+    const d = getWorkingDateForDay(day);
+    if (!d) return `Dag ${day}`;
     return d.toISOString().split('T')[0];
   };
 
