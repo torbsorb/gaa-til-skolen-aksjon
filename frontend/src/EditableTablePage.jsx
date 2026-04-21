@@ -4,6 +4,14 @@ import ClassLogo from './ClassLogo';
 
 
 function EditableTablePage() {
+  const sortClassesAlphabetically = (classList) => (
+    [...classList].sort((a, b) => {
+      const left = typeof a?.name === 'string' ? a.name : '';
+      const right = typeof b?.name === 'string' ? b.name : '';
+      return left.localeCompare(right, 'nb', { numeric: true, sensitivity: 'base' });
+    })
+  );
+
   const [classes, setClasses] = useState([]);
   const [tableData, setTableData] = useState({}); // { class_id: { day: walked_count } }
   const [editCounts, setEditCounts] = useState({}); // { class_id: { day: edit_count } }
@@ -65,7 +73,10 @@ function EditableTablePage() {
         if (!res.ok) throw new Error('Feil ved henting av klasser');
         return res.json();
       })
-      .then(data => setClasses(Array.isArray(data) ? data : []))
+      .then(data => {
+        const safeData = Array.isArray(data) ? data : [];
+        setClasses(sortClassesAlphabetically(safeData));
+      })
       .catch(() => setClasses([]));
 
     // Fetch all survey results and base date
