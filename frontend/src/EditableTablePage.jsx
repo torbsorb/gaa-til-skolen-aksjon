@@ -4,7 +4,7 @@ import ClassLogo from './ClassLogo';
 
 
 function EditableTablePage() {
-  const ADMIN_MARK_CLEAN_TOKEN = 'replace-me-with-strong-secret';
+  const ADMIN_MARK_CLEAN_TOKEN = 'gtils-mark-clean-2026-04-21-e2d9a7c4';
   const [classes, setClasses] = useState([]);
   const [tableData, setTableData] = useState({}); // { class_id: { day: walked_count } }
   const [editCounts, setEditCounts] = useState({}); // { class_id: { day: edit_count } }
