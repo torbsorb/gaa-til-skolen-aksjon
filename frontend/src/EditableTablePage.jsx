@@ -1,9 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import API_BASE from './apiBase';
 import ClassLogo from './ClassLogo';
 
 
 function EditableTablePage() {
+  const sortClassesAlphabetically = (classList) => (
+    [...classList].sort((a, b) => {
+      const left = typeof a?.name === 'string' ? a.name : '';
+      const right = typeof b?.name === 'string' ? b.name : '';
+      const nameCompare = left.localeCompare(right, 'nb', { numeric: true, sensitivity: 'base' });
+      if (nameCompare !== 0) return nameCompare;
+      return Number(a?.id ?? 0) - Number(b?.id ?? 0);
+    })
+  );
+
   const [classes, setClasses] = useState([]);
   const [tableData, setTableData] = useState({}); // { class_id: { day: walked_count } }
   const [editCounts, setEditCounts] = useState({}); // { class_id: { day: edit_count } }
@@ -65,7 +75,10 @@ function EditableTablePage() {
         if (!res.ok) throw new Error('Feil ved henting av klasser');
         return res.json();
       })
-      .then(data => setClasses(Array.isArray(data) ? data : []))
+      .then(data => {
+        const safeData = Array.isArray(data) ? data : [];
+        setClasses(safeData);
+      })
       .catch(() => setClasses([]));
 
     // Fetch all survey results and base date
@@ -97,6 +110,8 @@ function EditableTablePage() {
         // Keep preview defaults if endpoint is unavailable.
       });
   }, []);
+
+  const sortedClasses = useMemo(() => sortClassesAlphabetically(classes), [classes]);
 
   const handleChange = (classId, day, value, totalStudents) => {
     // Allow empty while editing, otherwise keep only integer input.
@@ -213,7 +228,7 @@ function EditableTablePage() {
           </tr>
         </thead>
         <tbody>
-          {classes.map(cls => (
+          {sortedClasses.map(cls => (
             <tr key={cls.id} style={{ height: DATA_ROW_HEIGHT_PX }}>
               {showClassColumn && (
                 <td style={{ whiteSpace: 'nowrap', color: '#111', paddingRight: 12, verticalAlign: 'middle' }}>
@@ -235,6 +250,7 @@ function EditableTablePage() {
                   <input
                     type="text"
                     inputMode="numeric"
+                    // Cell values are keyed by class id, so sorting rows never detaches data from class labels.
                     value={tableData[cls.id]?.[day] || ''}
                     disabled={day > currentCompetitionDay}
                     onChange={e => handleChange(cls.id, day, e.target.value, cls.total_students)}
