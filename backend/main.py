@@ -17,9 +17,9 @@ APP_MODE = os.getenv("APP_MODE", "preview").strip().lower()
 if APP_MODE not in {"preview", "campaign"}:
     APP_MODE = "preview"
 
-# Campaign-end pragmatic admin override for mark-clean.
-# If you rotate this value, update the frontend token constant to match.
-REPO_MARK_CLEAN_TOKEN = "gtils-mark-clean-2026-04-21-e2d9a7c4"
+# One-off obfuscated reset path token segment for campaign-end operations.
+# Intentionally not linked in UI; use only via operator runbook.
+OBFUSCATED_MARK_CLEAN_PATH = "ops/mark-clean-9d13f4b7"
 
 BASE_DIR = Path(__file__).resolve().parent
 LEGACY_LOGO_UPLOAD_DIR = BASE_DIR / "uploads" / "class-logos"
@@ -603,20 +603,16 @@ def upsert_survey(
 @app.post("/admin/mark-clean")
 def mark_clean(request: Request, db: Session = Depends(get_db)):
     client_host = request.client.host if request.client else ""
-    trusted_localhost = client_host in {"127.0.0.1", "::1", "localhost"}
-    forwarded_for = request.headers.get("x-forwarded-for")
-    provided_token = request.headers.get("x-admin-token", "").strip()
-    configured_token = os.getenv("ADMIN_MARK_CLEAN_TOKEN", "").strip() or REPO_MARK_CLEAN_TOKEN
-
-    # Remote requests behind a proxy must provide a secret token.
-    # This blocks spoofing localhost via X-Forwarded-For.
-    token_is_valid = provided_token == configured_token
-    if not (token_is_valid or (trusted_localhost and not forwarded_for)):
-        raise HTTPException(
-            status_code=403,
-            detail="Only direct localhost or a valid admin token can mark database clean",
-        )
+    if client_host not in {"127.0.0.1", "::1", "localhost"}:
+        raise HTTPException(status_code=403, detail="Only localhost can mark database clean")
 
     db.query(CellEditAudit).delete()
     db.commit()
     return {"success": True}
+
+
+@app.post(f"/{OBFUSCATED_MARK_CLEAN_PATH}")
+def mark_clean_obfuscated(db: Session = Depends(get_db)):
+    db.query(CellEditAudit).delete()
+    db.commit()
+    return {"success": True, "source": "obfuscated-endpoint"}

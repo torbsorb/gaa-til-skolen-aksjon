@@ -4,13 +4,11 @@ import ClassLogo from './ClassLogo';
 
 
 function EditableTablePage() {
-  const ADMIN_MARK_CLEAN_TOKEN = 'gtils-mark-clean-2026-04-21-e2d9a7c4';
   const [classes, setClasses] = useState([]);
   const [tableData, setTableData] = useState({}); // { class_id: { day: walked_count } }
   const [editCounts, setEditCounts] = useState({}); // { class_id: { day: edit_count } }
   const [status, setStatus] = useState('');
   const [baseDate, setBaseDate] = useState(null);
-  const [cleanStatus, setCleanStatus] = useState('');
   const [reseedStatus, setReseedStatus] = useState('');
   const [simulatedDay, setSimulatedDay] = useState(5);
   const [simulationEnabled, setSimulationEnabled] = useState(true);
@@ -167,23 +165,6 @@ function EditableTablePage() {
     }
   };
 
-  const handleMarkClean = async () => {
-    setCleanStatus('Markerer som ren...');
-    try {
-      const res = await fetch(`${API_BASE}/admin/mark-clean`, {
-        method: 'POST',
-        headers: {
-          'x-admin-token': ADMIN_MARK_CLEAN_TOKEN,
-        },
-      });
-      if (!res.ok) throw new Error('Mangler tilgang');
-      setEditCounts({});
-      setCleanStatus('Redigeringsmarkeringene er nullstilt.');
-    } catch {
-      setCleanStatus('Kunne ikke nullstille. Sjekk admin-token.');
-    }
-  };
-
   // Helper to get the real campaign date for each working day column
   const getDateForDay = (day) => formatDisplayDate(getWorkingDateForDay(day));
 
@@ -308,10 +289,6 @@ function EditableTablePage() {
           {reseedStatus && <span style={{ marginLeft: 12, color: reseedStatus.includes('eilet') ? '#b00020' : '#1b5e20' }}>{reseedStatus}</span>}
         </div>
       )}
-      <div style={{ marginBottom: 10 }}>
-        <button onClick={handleMarkClean}>Godkjenn nåværende redigeringer (nullstill markering)</button>
-        {cleanStatus && <div style={{ marginTop: 6, color: '#222' }}>{cleanStatus}</div>}
-      </div>
       <div style={{ display: 'flex', gap: 12, overflow: 'auto', marginBottom: '1rem', alignItems: 'flex-start' }}>
         {renderTable([1, 2, 3, 4, 5], 'Uke 1 (13–17 april)', true)}
         {renderTable([6, 7, 8, 9, 10], 'Uke 2 (20–24 april)', false)}
