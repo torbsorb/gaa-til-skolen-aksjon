@@ -1,0 +1,764 @@
+{
+  "metadata": {
+    "exported_at_utc": "2026-04-27T06:17:34.703694+00:00",
+    "source": "database",
+    "frozen": true,
+    "note": "Replace this file by rerunning export_frozen_results.py before shutting down backend/postgres."
+  },
+  "app_config": {
+    "app_mode": "archived",
+    "simulation_enabled": false,
+    "frozen": true
+  },
+  "classes": [
+    {
+      "id": 2,
+      "name": "1C",
+      "group_id": 1,
+      "group_name": "Hammerbakken",
+      "total_students": 21
+    },
+    {
+      "id": 5,
+      "name": "2C",
+      "group_id": 1,
+      "group_name": "Hammerbakken",
+      "total_students": 28
+    },
+    {
+      "id": 8,
+      "name": "3C",
+      "group_id": 1,
+      "group_name": "Hammerbakken",
+      "total_students": 27
+    },
+    {
+      "id": 10,
+      "name": "4C",
+      "group_id": 1,
+      "group_name": "Hammerbakken",
+      "total_students": 28
+    },
+    {
+      "id": 1,
+      "name": "1A",
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "total_students": 26
+    },
+    {
+      "id": 3,
+      "name": "2A",
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "total_students": 20
+    },
+    {
+      "id": 4,
+      "name": "2B",
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "total_students": 20
+    },
+    {
+      "id": 6,
+      "name": "3A",
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "total_students": 23
+    },
+    {
+      "id": 7,
+      "name": "3B",
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "total_students": 23
+    },
+    {
+      "id": 9,
+      "name": "4A",
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "total_students": 30
+    },
+    {
+      "id": 11,
+      "name": "5A",
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "total_students": 21
+    },
+    {
+      "id": 12,
+      "name": "5B",
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "total_students": 21
+    },
+    {
+      "id": 13,
+      "name": "5C",
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "total_students": 22
+    },
+    {
+      "id": 14,
+      "name": "6A",
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "total_students": 22
+    },
+    {
+      "id": 15,
+      "name": "6C",
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "total_students": 22
+    },
+    {
+      "id": 16,
+      "name": "7A",
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "total_students": 22
+    },
+    {
+      "id": 17,
+      "name": "7B",
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "total_students": 22
+    },
+    {
+      "id": 18,
+      "name": "7C",
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "total_students": 22
+    }
+  ],
+  "standings": [
+    {
+      "group_id": 1,
+      "group_name": "Hammerbakken",
+      "class_id": 10,
+      "class_name": "4C",
+      "walked_total": 250,
+      "total_students": 28,
+      "percent_walked": 89.28571428571429
+    },
+    {
+      "group_id": 1,
+      "group_name": "Hammerbakken",
+      "class_id": 2,
+      "class_name": "1C",
+      "walked_total": 162,
+      "total_students": 21,
+      "percent_walked": 77.14285714285715
+    },
+    {
+      "group_id": 1,
+      "group_name": "Hammerbakken",
+      "class_id": 8,
+      "class_name": "3C",
+      "walked_total": 205,
+      "total_students": 27,
+      "percent_walked": 75.92592592592592
+    },
+    {
+      "group_id": 1,
+      "group_name": "Hammerbakken",
+      "class_id": 5,
+      "class_name": "2C",
+      "walked_total": 169,
+      "total_students": 28,
+      "percent_walked": 60.357142857142854
+    },
+    {
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "class_id": 4,
+      "class_name": "2B",
+      "walked_total": 188,
+      "total_students": 20,
+      "percent_walked": 94.0
+    },
+    {
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "class_id": 6,
+      "class_name": "3A",
+      "walked_total": 191,
+      "total_students": 23,
+      "percent_walked": 83.04347826086956
+    },
+    {
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "class_id": 1,
+      "class_name": "1A",
+      "walked_total": 206,
+      "total_students": 26,
+      "percent_walked": 79.23076923076923
+    },
+    {
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "class_id": 3,
+      "class_name": "2A",
+      "walked_total": 146,
+      "total_students": 20,
+      "percent_walked": 73.0
+    },
+    {
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "class_id": 7,
+      "class_name": "3B",
+      "walked_total": 156,
+      "total_students": 23,
+      "percent_walked": 67.82608695652173
+    },
+    {
+      "group_id": 2,
+      "group_name": "Bryn 1-4",
+      "class_id": 9,
+      "class_name": "4A",
+      "walked_total": 189,
+      "total_students": 30,
+      "percent_walked": 63.0
+    },
+    {
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "class_id": 11,
+      "class_name": "5A",
+      "walked_total": 192,
+      "total_students": 21,
+      "percent_walked": 91.42857142857143
+    },
+    {
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "class_id": 14,
+      "class_name": "6A",
+      "walked_total": 201,
+      "total_students": 22,
+      "percent_walked": 91.36363636363637
+    },
+    {
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "class_id": 13,
+      "class_name": "5C",
+      "walked_total": 197,
+      "total_students": 22,
+      "percent_walked": 89.54545454545455
+    },
+    {
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "class_id": 12,
+      "class_name": "5B",
+      "walked_total": 165,
+      "total_students": 21,
+      "percent_walked": 78.57142857142857
+    },
+    {
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "class_id": 18,
+      "class_name": "7C",
+      "walked_total": 149,
+      "total_students": 22,
+      "percent_walked": 67.72727272727272
+    },
+    {
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "class_id": 17,
+      "class_name": "7B",
+      "walked_total": 143,
+      "total_students": 22,
+      "percent_walked": 65.0
+    },
+    {
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "class_id": 15,
+      "class_name": "6C",
+      "walked_total": 139,
+      "total_students": 22,
+      "percent_walked": 63.18181818181819
+    },
+    {
+      "group_id": 3,
+      "group_name": "Bryn 5-7",
+      "class_id": 16,
+      "class_name": "7A",
+      "walked_total": 137,
+      "total_students": 22,
+      "percent_walked": 62.272727272727266
+    }
+  ],
+  "results_table": {
+    "table": {
+      "2": {
+        "1": 14,
+        "2": 15,
+        "3": 17,
+        "4": 17,
+        "5": 15,
+        "6": 17,
+        "7": 18,
+        "8": 14,
+        "9": 18,
+        "10": 17
+      },
+      "5": {
+        "1": 16,
+        "2": 15,
+        "3": 16,
+        "4": 18,
+        "5": 17,
+        "6": 17,
+        "7": 16,
+        "8": 16,
+        "9": 20,
+        "10": 18
+      },
+      "8": {
+        "1": 19,
+        "2": 19,
+        "3": 21,
+        "4": 19,
+        "5": 21,
+        "6": 23,
+        "7": 20,
+        "8": 19,
+        "9": 23,
+        "10": 21
+      },
+      "10": {
+        "1": 22,
+        "2": 26,
+        "3": 26,
+        "4": 25,
+        "5": 24,
+        "6": 26,
+        "7": 23,
+        "8": 25,
+        "9": 25,
+        "10": 28
+      },
+      "1": {
+        "1": 19,
+        "2": 20,
+        "3": 20,
+        "4": 23,
+        "5": 22,
+        "6": 23,
+        "7": 19,
+        "8": 21,
+        "9": 19,
+        "10": 20
+      },
+      "3": {
+        "1": 13,
+        "2": 16,
+        "3": 14,
+        "4": 13,
+        "5": 13,
+        "6": 16,
+        "7": 15,
+        "8": 16,
+        "9": 15,
+        "10": 15
+      },
+      "4": {
+        "1": 18,
+        "2": 19,
+        "3": 20,
+        "4": 19,
+        "5": 20,
+        "6": 19,
+        "7": 20,
+        "8": 17,
+        "9": 18,
+        "10": 18
+      },
+      "6": {
+        "1": 17,
+        "2": 20,
+        "3": 17,
+        "4": 18,
+        "5": 21,
+        "6": 19,
+        "7": 19,
+        "8": 20,
+        "9": 20,
+        "10": 20
+      },
+      "7": {
+        "1": 13,
+        "2": 15,
+        "3": 15,
+        "4": 14,
+        "5": 18,
+        "6": 17,
+        "7": 15,
+        "8": 16,
+        "9": 15,
+        "10": 18
+      },
+      "9": {
+        "1": 16,
+        "2": 17,
+        "3": 20,
+        "4": 21,
+        "5": 18,
+        "6": 16,
+        "7": 18,
+        "8": 22,
+        "9": 19,
+        "10": 22
+      },
+      "11": {
+        "1": 18,
+        "2": 19,
+        "3": 18,
+        "4": 21,
+        "5": 21,
+        "6": 18,
+        "7": 20,
+        "8": 19,
+        "9": 18,
+        "10": 20
+      },
+      "12": {
+        "1": 18,
+        "2": 17,
+        "3": 14,
+        "4": 16,
+        "5": 15,
+        "6": 18,
+        "7": 18,
+        "8": 18,
+        "9": 16,
+        "10": 15
+      },
+      "13": {
+        "1": 22,
+        "2": 18,
+        "3": 20,
+        "4": 18,
+        "5": 21,
+        "6": 21,
+        "7": 18,
+        "8": 20,
+        "9": 20,
+        "10": 19
+      },
+      "14": {
+        "1": 20,
+        "2": 19,
+        "3": 20,
+        "4": 21,
+        "5": 19,
+        "6": 19,
+        "7": 22,
+        "8": 21,
+        "9": 20,
+        "10": 20
+      },
+      "15": {
+        "1": 13,
+        "2": 13,
+        "3": 15,
+        "4": 13,
+        "5": 13,
+        "6": 12,
+        "7": 15,
+        "8": 13,
+        "9": 16,
+        "10": 16
+      },
+      "16": {
+        "1": 13,
+        "2": 14,
+        "3": 12,
+        "4": 12,
+        "5": 16,
+        "6": 14,
+        "7": 14,
+        "8": 15,
+        "9": 15,
+        "10": 12
+      },
+      "17": {
+        "1": 14,
+        "2": 14,
+        "3": 14,
+        "4": 15,
+        "5": 15,
+        "6": 16,
+        "7": 12,
+        "8": 14,
+        "9": 13,
+        "10": 16
+      },
+      "18": {
+        "1": 14,
+        "2": 15,
+        "3": 15,
+        "4": 14,
+        "5": 14,
+        "6": 17,
+        "7": 15,
+        "8": 17,
+        "9": 15,
+        "10": 13
+      }
+    },
+    "edit_counts": {
+      "2": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "5": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "8": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "10": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "1": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "3": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "4": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "6": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "7": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "9": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "11": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "12": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "13": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "14": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "15": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "16": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "17": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      },
+      "18": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0,
+        "9": 0,
+        "10": 0
+      }
+    },
+    "base_date": "2026-04-13"
+  },
+  "logos": {
+    "1A": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZjhmM2VhIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiNlMzdhNGQiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+mijwvdGV4dD4KPC9zdmc+Cg==",
+    "1C": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZjFmNGY4Ii8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM4YzZmYmQiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+miTwvdGV4dD4KPC9zdmc+Cg==",
+    "2A": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZjdmMGVhIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM4ZDVhM2MiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+QuzwvdGV4dD4KPC9zdmc+Cg==",
+    "2B": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZWVmNWYwIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM1ZDhjNmQiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+rjjwvdGV4dD4KPC9zdmc+Cg==",
+    "2C": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZjZmMmVhIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiNkODliNDkiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+QsDwvdGV4dD4KPC9zdmc+Cg==",
+    "3A": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZjFmNmVmIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM3ZGExNGQiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+Qv++4jzwvdGV4dD4KPC9zdmc+Cg==",
+    "3B": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZjVmMmVmIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM2YTZkNzMiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+moTwvdGV4dD4KPC9zdmc+Cg==",
+    "3C": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZWVmMmY3Ii8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM1ZDZmODciLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+QujwvdGV4dD4KPC9zdmc+Cg==",
+    "4A": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZWRmN2Y2Ii8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM0ZWE3YTAiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+mpjwvdGV4dD4KPC9zdmc+Cg==",
+    "4C": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZjdmMWViIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiNiMzgzNWYiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+mlDwvdGV4dD4KPC9zdmc+Cg==",
+    "5A": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZWVmNGViIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM3YThkNGUiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+mqzwvdGV4dD4KPC9zdmc+Cg==",
+    "5B": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZWRmN2VjIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM0YTliNjIiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+QuDwvdGV4dD4KPC9zdmc+Cg==",
+    "5C": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZjVmMGU4Ii8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM5YjdhNTgiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+mjDwvdGV4dD4KPC9zdmc+Cg==",
+    "6A": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZWVmM2Y4Ii8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM1ZjdlYTMiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+mhTwvdGV4dD4KPC9zdmc+Cg==",
+    "6C": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZWZmNmYyIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM0YzliN2YiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+QojwvdGV4dD4KPC9zdmc+Cg==",
+    "7A": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZWVmM2Y4Ii8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiM1ZjhjYmYiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+QpzwvdGV4dD4KPC9zdmc+Cg==",
+    "7B": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZjhmMWViIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiNlMDhiNDQiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+QrzwvdGV4dD4KPC9zdmc+Cg==",
+    "7C": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj4KICA8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI4IiBmaWxsPSIjZjhmM2VhIi8+CiAgPGNpcmNsZSBjeD0iNjAiIGN5PSI2MCIgcj0iNDIiIGZpbGw9IiNkN2EyMzYiLz4KICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjYwIiByPSIzNCIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC4yMiIvPgogIDx0ZXh0IHg9IjYwIiB5PSI3NCIgZm9udC1zaXplPSI0NCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+mgTwvdGV4dD4KPC9zdmc+Cg=="
+  }
+}
