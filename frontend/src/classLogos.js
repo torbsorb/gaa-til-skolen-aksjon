@@ -1,6 +1,6 @@
-import API_BASE from './apiBase';
+import { fetchFrozenLogoMap } from './frozenResults';
 
-// Default class logos are now loaded from the API
+// Default class logos are loaded from static assets.
 const CLASS_LOGOS = {
   '1A': null,
   '1C': null,
@@ -35,13 +35,9 @@ export async function loadRemoteClassLogos(force = false) {
     return remoteLoadPromise;
   }
 
-  remoteLoadPromise = fetch(`${API_BASE}/admin/class-logo-map`, { cache: 'no-store' })
-    .then((res) => {
-      if (!res.ok) throw new Error('Could not fetch class logo map');
-      return res.json();
-    })
-    .then((data) => {
-      remoteClassLogos = data && typeof data.logos === 'object' && data.logos ? data.logos : {};
+  remoteLoadPromise = fetchFrozenLogoMap(force)
+    .then((logos) => {
+      remoteClassLogos = logos && typeof logos === 'object' ? logos : {};
       notifySubscribers();
       return remoteClassLogos;
     })

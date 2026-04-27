@@ -1,11 +1,8 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-import SurveyPage from './SurveyPage';
 import ResultsPage from './ResultsPage';
-import EditableTablePage from './EditableTablePage';
-import LandingPage from './LandingPage';
-import ClassLogoManagerPage from './ClassLogoManagerPage';
+import ArchivedPortalPage from './ArchivedPortalPage';
 
 const TEACHER_PORTAL_PATH = '/secretTeacherPortal273892';
 
@@ -45,10 +42,10 @@ function AppRouter() {
         <Route path="/" element={<ResultsPage />} />
         <Route path="/results" element={<ResultsPage />} />
 
-        <Route path={TEACHER_PORTAL_PATH} element={<LandingPage />} />
-        <Route path={`${TEACHER_PORTAL_PATH}/survey`} element={<SurveyPage />} />
-        <Route path={`${TEACHER_PORTAL_PATH}/edit-table`} element={<EditableTablePage />} />
-        <Route path={`${TEACHER_PORTAL_PATH}/class-logos`} element={<ClassLogoManagerPage />} />
+        <Route path={TEACHER_PORTAL_PATH} element={<ArchivedPortalPage />} />
+        <Route path={`${TEACHER_PORTAL_PATH}/survey`} element={<ArchivedPortalPage />} />
+        <Route path={`${TEACHER_PORTAL_PATH}/edit-table`} element={<ArchivedPortalPage />} />
+        <Route path={`${TEACHER_PORTAL_PATH}/class-logos`} element={<ArchivedPortalPage />} />
 
         <Route path="/survey" element={<Navigate to="/" replace />} />
         <Route path="/edit-table" element={<Navigate to="/" replace />} />

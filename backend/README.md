@@ -17,6 +17,27 @@ This backend provides API endpoints for:
   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
+## Freeze final results for static hosting
+When the competition is over, export one snapshot file for the static frontend and then shut down backend/Postgres.
+
+1. Ensure backend can connect to the final database (`DATABASE_URL` set as needed).
+2. Run export:
+
+```bash
+cd backend
+python scripts/export_frozen_results.py
+```
+
+3. Commit the generated file:
+- `frontend/public/frozen-results.json`
+
+Optional custom output path:
+
+```bash
+cd backend
+python scripts/export_frozen_results.py --output /absolute/path/to/frozen-results.json
+```
+
 ## Local Development (Postgres-First)
 Use this to keep local behavior as close to deployment as possible.
 
@@ -127,6 +148,29 @@ Migration behavior:
 
 ## Deployment Scripts
 Scripts live in `backend/scripts`.
+
+### 0) Export frozen results snapshot (post-campaign)
+Use this when the competition is over and you want to serve a static frontend without backend/DB runtime.
+
+```bash
+cd backend
+python scripts/export_frozen_results.py
+```
+
+Optional custom output path:
+
+```bash
+cd backend
+python scripts/export_frozen_results.py --output ../frontend/public/frozen-results.json
+```
+
+This script writes `frontend/public/frozen-results.json` containing:
+- classes
+- standings
+- results table (day 1-10)
+- embedded custom logos from DB (`logos`)
+
+After exporting and deploying static frontend assets, you can shut down backend/Postgres.
 
 ### 1) Seed preview data
 Use before rehearsal/demo environments.

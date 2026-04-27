@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
-import API_BASE from './apiBase';
 import ClassLogo from './ClassLogo';
 import { getChartSeriesStyle } from './chartSeriesColors';
+import { fetchFrozenAppConfig, fetchFrozenClasses, fetchFrozenResultsTable, fetchFrozenStandings } from './frozenResults';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -82,20 +82,15 @@ function ResultsPage() {
     setLoadingLeaders(true);
     setApiError('');
     try {
-      const res = await fetch(`${API_BASE}/standings`);
-      if (!res.ok) {
-        const body = await res.text();
-        throw new Error(`GET /standings feilet (${res.status}). ${body.slice(0, 180)}`);
-      }
-      const data = await res.json();
+      const data = await fetchFrozenStandings();
       if (!Array.isArray(data)) {
-        throw new Error('GET /standings returnerte ugyldig format (forventet liste).');
+        throw new Error('frozen-results.json inneholder ugyldig standings-format.');
       }
       setLeaders(data);
     } catch (err) {
       setLeaders([]);
       const message = err instanceof Error ? err.message : 'Ukjent feil.';
-      setApiError(`Klarte ikke hente resultater fra backend. ${message}`);
+      setApiError(`Klarte ikke hente fryste resultater. ${message}`);
     }
     setLoadingLeaders(false);
   };
@@ -103,9 +98,7 @@ function ResultsPage() {
   // Fetch table data for cumulative graph
   const fetchTableData = async () => {
     try {
-      const res = await fetch(`${API_BASE}/results-table`);
-      if (!res.ok) throw new Error('Feil ved henting av tabell');
-      const data = await res.json();
+      const data = await fetchFrozenResultsTable();
       setTableData(data && typeof data.table === 'object' ? data.table : {});
       setBaseDate(data.base_date || null);
     } catch {
@@ -117,9 +110,7 @@ function ResultsPage() {
   // Fetch classes for labels
   const fetchClasses = async () => {
     try {
-      const res = await fetch(`${API_BASE}/classes`);
-      if (!res.ok) throw new Error('Feil ved henting av klasser');
-      const data = await res.json();
+      const data = await fetchFrozenClasses();
       setClasses(Array.isArray(data) ? data : []);
     } catch {
       setClasses([]);
@@ -128,12 +119,10 @@ function ResultsPage() {
 
   const fetchAppConfig = async () => {
     try {
-      const res = await fetch(`${API_BASE}/app-config`);
-      if (!res.ok) return;
-      const data = await res.json();
+      const data = await fetchFrozenAppConfig();
       setSimulationEnabled(Boolean(data.simulation_enabled));
     } catch {
-      // Keep defaults for local development if config endpoint is unavailable.
+      // Keep defaults if frozen snapshot cannot be loaded yet.
     }
   };
 

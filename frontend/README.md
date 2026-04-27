@@ -1,3 +1,49 @@
+# Frontend (Static Archive Mode)
+
+This frontend can now run as a fully static archive after the competition.
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+## Build static site
+
+```bash
+npm run build
+```
+
+The build output can be hosted on any static host (Cloudflare Pages, GitHub Pages, Netlify, Render Static Site).
+
+## Frozen results source
+
+The app reads archived data from:
+
+- `public/frozen-results.json`
+
+Expected top-level keys:
+
+- `metadata`
+- `app_config`
+- `classes`
+- `standings`
+- `results_table` (`table`, `edit_counts`, `base_date`)
+- `logos`
+
+Teacher/admin routes are intentionally locked and show an archive message.
+
+## Export final results from backend DB
+
+Before shutting down backend/Postgres, export final data:
+
+```bash
+cd backend
+python scripts/export_frozen_results.py
+```
+
+This writes `frontend/public/frozen-results.json`.
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
